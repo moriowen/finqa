@@ -1,0 +1,15 @@
+# PDF parsing
+pymupdf
+pdfplumber
+# Retrieval baseline
+rank-bm25
+numpy
+# Data and evaluation
+pandas
+tqdm
+# LLM access and configuration
+anthropic
+openai
+python-dotenv
+# Tests
+pytest

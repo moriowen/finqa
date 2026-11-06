@@ -1,0 +1,10 @@
+.venv/
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+# Dataset clone: fetch with scripts/fetch_data.sh
+data/
+# Generated indexes and caches
+artifacts/
