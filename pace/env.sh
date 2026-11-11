@@ -17,3 +17,6 @@ if command -v module >/dev/null 2>&1; then module load python/3.12.5 >/dev/null 
 set -u
 cd "$PROJECT_DIR"
 mkdir -p pace/logs runs
+
+# per-job vLLM compile cache on node-local disk: parallel jobs sharing it on NFS crashed with "Stale file handle"
+export VLLM_CACHE_ROOT="${TMPDIR:-/tmp}/vllm-cache-${SLURM_JOB_ID:-0}"

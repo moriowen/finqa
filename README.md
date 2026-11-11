@@ -6,17 +6,22 @@ The short write-up is [`docs/report.md`](docs/report.md). This README holds the 
 
 ## Main result
 
-Official configuration: **Qwen3.5-9B with the full harness**, Path A (the filing is given). Verifier: Gemma 4 12B. Judge: gpt-oss-20b.
+Official configuration: **Qwen3.5-9B with the full harness**, Path A (the filing is given). Verifier: Gemma 4 12B. Judge: gpt-oss-20b. 9B was chosen over 27B by the rule fixed in advance (lowest wrong-answer rate on the 51 dev questions: 9B 5 wrong, 27B 10 wrong, same 26 correct).
 
 | | Correct | Wrong | Refused | Wrong-answer rate |
 |---|---|---|---|---|
 | Qwen3.5-9B, one prompt, same pages ("bare") | 91 | 59 | 0 | 39% |
 | **Qwen3.5-9B, full harness** | **71** | **17** | **62** | **11%** |
+| Qwen3.5-27B (FP8), full harness | 76 | 24 | 50 | 16% |
+| Qwen3.5-27B (FP8), full harness, **no filing given (Path B)** | 72 | 20 | 58 | 13% |
 | GPT-4 Turbo, FinanceBench paper, single vector store | 75 | 17 | 58 | 11% |
+| GPT-4 Turbo, FinanceBench paper, shared vector store (no filing given) | 29 | 20 | 101 | 13% |
 
 The harness cut the 9B model's wrong answers from 59 to 17, and coverage fell from 100% to 59%. With this trade, a local 9B model ends up close to the paper's GPT-4 Turbo single-store result. The two rows were graded differently (our judge model against the paper's human labels), so treat this as a rough comparison.
 
-On 290 questions where the filing holds no answer (wrong filing, or the year shifted), the full harness answered 1 time. The bare model answered 20 times.
+On 290 questions where the filing holds no answer (wrong filing, or the year shifted), the 9B full harness answered 1 time. The bare model answered 20 times.
+
+Without being told the filing, the 27B system answered 72 questions correctly, against 29 for GPT-4 Turbo in the paper's matching setup, at the same wrong-answer rate.
 
 ## How it works
 
@@ -34,7 +39,7 @@ On 290 questions where the filing holds no answer (wrong filing, or the year shi
 6. **Verifier.** A model from a different family (Gemma 4 12B) gets the question, the evidence, the answer and images of the cited pages. It must confirm the period, the unit, the column and the support. Anything other than a clear yes gives NOT_FOUND.
 7. **Output.** ANSWER, NOT_FOUND or AMBIGUOUS. The provenance (filing, PDF page, quote, passage, column, scale) is attached by code from the checked values. The model never writes it. Each row also names the answering model and the verifier.
 
-Path B (no filing given) is built: a router picks up to 3 candidate filings, each runs separately, and G8 combines them (if they disagree, the result is AMBIGUOUS). It was not evaluated, because its planned run used the 27B model (see Limitations).
+Path B (no filing given): a router (LLM, enforced choice from the 42 companies) picks up to 3 candidate filings by company, period and type. Each runs the pipeline separately, and G8 combines them: if they disagree, the result is AMBIGUOUS with each value and its provenance. Path B was evaluated with 27B only.
 
 Every design decision, with its evidence and what happens if it is wrong, is in [`docs/assumptions.md`](docs/assumptions.md) (A1 to A23). The design is in [`docs/architecture.md`](docs/architecture.md), and the run log is in [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md).
 
@@ -52,10 +57,13 @@ All numbers come from `python -m finqa.evals.tables` ([`results/tables.md`](resu
 
 ### Model size × harness (150 questions)
 
-"Bare" = the same retrieved pages and one prompt, without checks. "Oracle" = the gold pages instead of retrieval. "Gloss" = a glossary of financial definitions added to the prompt.
+"Bare" = the same retrieved pages and one prompt, without checks. "Oracle" = the gold pages instead of retrieval (a control, not part of the system). "Gloss" = a glossary of financial definitions added to the prompt (not run for 27B, because it hurt 2B and 9B).
 
 | Model | Setting | Correct | Wrong | Refused | Wrong-answer rate [95% CI] | Coverage | Selective accuracy | Cited page is a gold page | Test only (99): wrong / correct |
 |---|---|---|---|---|---|---|---|---|---|
+| Qwen3.5-27B (FP8) | bare | 100 | 49 | 1 | 33% [25 to 40] | 99% | 67% | n/a | 32% / 67% |
+| Qwen3.5-27B (FP8) | full | 76 | 24 | 50 | 16% [10 to 22] | 67% | 76% | 85% | 14% / 51% |
+| Qwen3.5-27B (FP8) | oracle pages | 89 | 16 | 45 | 11% [6 to 15] | 70% | 85% | 100% | 10% / 57% |
 | Qwen3.5-9B | bare | 91 | 59 | 0 | 39% [31 to 47] | 100% | 61% | n/a | 38% / 62% |
 | Qwen3.5-9B | **full** | 71 | 17 | 62 | **11% [7 to 17]** | 59% | 81% | 84% | 12% / 45% |
 | Qwen3.5-9B | full + glossary | 61 | 17 | 72 | 11% [7 to 17] | 52% | 78% | 86% | 13% / 39% |
@@ -69,12 +77,38 @@ All numbers come from `python -m finqa.evals.tables` ([`results/tables.md`](resu
 
 | Model | Setting | False answers | Wrong filing | Shifted year |
 |---|---|---|---|---|
+| Qwen3.5-27B (FP8) | bare | 22/290 (8%) | 7% | 9% |
+| Qwen3.5-27B (FP8) | full | 12/290 (4%) | 7% | 1% |
 | Qwen3.5-9B | bare | 20/290 (7%) | 5% | 9% |
 | Qwen3.5-9B | full | 1/290 (0.3%) | 0% | 1% |
 | Qwen3.5-9B | full + glossary | 2/290 (1%) | 1% | 1% |
 | Qwen3.5-2B | bare | 53/290 (18%) | 17% | 20% |
 | Qwen3.5-2B | full | 0/290 (0%) | 0% | 0% |
 | Qwen3.5-2B | full + glossary | 2/290 (1%) | 1% | 0% |
+
+The 27B full count needs a note. In 10 of its 12 "false answers", the answer itself says that the filing belongs to another company ("the metric is not applicable because the provided evidence is for Amcor, not JPM"). Many questions say "if the metric is not useful, say so", and 27B used that route to refuse. The system returns these with status ANSWER, so the score counts them as answers. In substance only about 2 of the 12 are real false answers.
+
+### Size ladder: what a bigger model buys
+
+| | 2B | 9B | 27B (FP8) |
+|---|---|---|---|
+| Bare: correct / wrong | 73 / 76 | 91 / 59 | 100 / 49 |
+| Full harness: correct / wrong | 12 / 2 | 71 / 17 | 76 / 24 |
+| Oracle pages: correct / wrong | 14 / 5 | 71 / 19 | 89 / 16 |
+| Reach the verifier (pass all code checks) | 18 | 97 | 106 |
+| LLM seconds per question (full) | 21 | 59 | 190 |
+
+- Size helps the bare model steadily: 51%, 39%, 33% wrong.
+- With the harness, 9B gives the best wrong-answer rate. 27B answers 5 more questions correctly but 7 more wrongly. 27B passes more checks, and the weak verifier lets more of its wrong answers through.
+- Retrieval matters for 27B and not for 9B. With gold pages, 27B gains 13 correct answers and loses 8 wrong ones. 9B gains nothing. A bigger model can use good pages, and a smaller one fails earlier, at reading.
+
+### Path B: no filing given (27B, full harness)
+
+| Correct | Wrong | Refused (NOT_FOUND / AMBIGUOUS) | Wrong-answer rate | Coverage | Cost per question |
+|---|---|---|---|---|---|
+| 72 | 20 | 58 (44 / 14) | 13% | 61% | 4.4 LLM calls, 391 s |
+
+The router sent 150 questions to 333 candidate filings. Path B lost only 4 correct answers against Path A for the same model. 14 questions came back AMBIGUOUS because two candidate filings gave different answers.
 
 ### Where the 9B answers are lost (full harness, 150 questions)
 
@@ -93,6 +127,9 @@ These are the answers that passed all code checks, before the verifier. "Leak" =
 
 | Run | Checked | Accepted correct | Accepted wrong (leak) | Rejected correct (lost) | Rejected wrong (caught) |
 |---|---|---|---|---|---|
+| 27B full | 106 | 79 | 22 | 1 | 4 |
+| 27B oracle | 119 | 88 | 19 | 5 | 7 |
+| 27B Path B (per candidate filing) | 165 | 119 | 35 | 1 | 10 |
 | 9B full | 97 | 70 | 18 | 1 | 8 |
 | 9B full + glossary | 85 | 61 | 17 | 1 | 6 |
 | 9B oracle | 96 | 72 | 18 | 2 | 4 |
@@ -141,7 +178,9 @@ The 20b judge errs on the strict side. Most of the disagreement comes from the p
 
 ## What did not work
 
-- **Retrieval is not the bottleneck.** With the gold pages (oracle), 9B gets the same 71 correct answers. The losses are in reading and reasoning: 35 questions fail a code check twice, and 18 more fail at extraction.
+- **Retrieval is not the bottleneck for 9B.** With the gold pages (oracle), 9B gets the same 71 correct answers. The losses are in reading and reasoning: 35 questions fail a code check twice, and 18 more fail at extraction. For 27B, retrieval does cost 13 correct answers.
+- **A bigger model did not lower the wrong-answer rate.** 27B is better bare, but with the harness it answers more and is wrong more (16% against 11%). The verifier is the weak link: it caught 4 of 26 wrong 27B answers.
+- **"Not applicable" leaks through as an answer.** The model can mark a metric as not applicable, and the system returns that as an ANSWER. 27B used this route to say "this is the wrong company". The fix is to map those cases to NOT_FOUND.
 - **The 2B model is too weak for strict checks.** It answers only 9% of questions. Those answers are almost always right, but the system is close to useless at that coverage.
 - **The glossary hurt.** Coverage fell from 59% to 52%, and the wrong count stayed the same.
 - **The verifier misses most wrong answers.** Of the 17 wrong 9B answers, most are not reading errors. They are definition choices: working capital from total instead of operating current assets, a different quick ratio, capex/revenue instead of assets/revenue for capital intensity. Others are judgment questions where the model's yes/no differs from the analyst's. A verifier that only checks the cited page cannot catch a valid number that answers a different definition.
@@ -152,17 +191,18 @@ The 20b judge errs on the strict side. Most of the disagreement comes from the p
 1. **Definitions.** When a question names a metric with more than one common definition, the system should state the definition it used, or ask. The glossary tried to fix the definition in advance and failed. Showing the choice to the user is better.
 2. **A stronger verifier** that also checks the formula against the question, not only the page values. Most of the remaining wrong answers come from the formula.
 3. **Fewer losses at the checks.** 35 questions fail a code check twice. A third retry with the full error history, or a larger model on retry only, would recover some of them.
-4. **Evaluate Path B.** It is built, but it has no numbers yet.
+4. **Map "not applicable because the filing is about another company" to NOT_FOUND** (a code check on the company name in the filing metadata).
+5. **Path B with 9B,** to compare the router with the model that has the best Path A wrong-answer rate.
 
 ## Limitations and compute
 
 The work ran on Georgia Tech PACE ICE with a student allocation. 80 GB GPUs (H100, H200, A100-80GB) waited in the queue for more than a day, so we changed the plan:
 
-- **No 27B results.** Qwen3.5-27B (about 54 GB in bf16) does not fit on the 47 GB Blackwell GPUs that were free. Only dev round 1 has 27B numbers. They are in [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) and are not comparable with the final runs.
+- **27B ran in FP8.** Qwen3.5-27B in bf16 (about 52 GB) does not fit on one 47 GB Blackwell partition, and ICE's Blackwell cards are MIG partitions that cannot be joined for a split model. We used Qwen's official FP8 checkpoint (`Qwen/Qwen3.5-27B-FP8`, 31 GB). FP8 is usually very close to bf16, but it is not identical.
 - **A smaller verifier and judge.** Gemma 4 12B replaced the planned Qwen3.5-27B verifier. A non-Qwen verifier is a better design, because it does not share the answering model's errors. gpt-oss-20b replaced gpt-oss-120b as the judge, and its calibration is shown above.
 - **One seed, temperature 0.** No variance across seeds.
 
-**With more compute:** run 27B or larger as the answering model, a larger verifier with reasoning turned on, the 120b judge, Path B, and several seeds. The harness does not change for any of this: each model is a setting of the job script.
+**With more compute:** run 27B in bf16 and larger models, a larger verifier with reasoning turned on, the 120b judge, Path B for every size, and several seeds. The harness does not change for any of this: each model is a setting of the job script.
 
 ## Reproduce
 

@@ -26,27 +26,27 @@ def main():
     out.append("### Model size × harness (150 questions, Path A; verifier Gemma 4 12B, judge gpt-oss-20b)\n")
     out.append("| Model | Setting | Correct | Wrong | Refused | Wrong-answer rate [95% CI] | Coverage | Selective accuracy | Page hit | Test only (99): wrong / correct |")
     out.append("|---|---|---|---|---|---|---|---|---|---|")
-    for size in ("9b", "2b"):
+    for size in ("27b", "9b", "2b"):
         for setting in ("bare", "full", "full-gloss", "oracle"):
             r = runs.get(f"all-{size}-{setting}")
             if not r or not r.get("real"):
                 continue
             x = r["real"]
             ph = (r.get("provenance") or {}).get("page_hit_rate") if setting != "bare" else None
-            out.append(f"| Qwen3.5-{size.upper()} | {setting} | {x['correct']} | {x['incorrect']} | {x['refusal']} | "
+            out.append(f"| Qwen3.5-{size.upper()}{' (FP8)' if size == '27b' else ''} | {setting} | {x['correct']} | {x['incorrect']} | {x['refusal']} | "
                        f"{pct(x['wrong_rate'])}{ci(x.get('wrong_ci'))} | {pct(x['coverage'])} | {pct(x['selective_acc'])} | {pct(ph)} | "
                        f"{pct((r.get('test') or {}).get('wrong_rate'))} / {pct((r.get('test') or {}).get('accuracy'))} |")
 
     out.append("\n### Questions with no answer in the filing (E6, 290 per model)\n")
     out.append("| Model | Setting | False answers | Wrong filing | Shifted year |")
     out.append("|---|---|---|---|---|")
-    for size in ("9b", "2b"):
+    for size in ("27b", "9b", "2b"):
         for setting in ("bare", "full", "full-gloss"):
             r = runs.get(f"unans-{size}-{setting}")
             if not r or not r.get("unanswerable"):
                 continue
             u = r["unanswerable"]
-            out.append(f"| Qwen3.5-{size.upper()} | {setting} | {u['false_answer']}/{u['n']} ({pct(u['false_answer_rate'])}) | "
+            out.append(f"| Qwen3.5-{size.upper()}{' (FP8)' if size == '27b' else ''} | {setting} | {u['false_answer']}/{u['n']} ({pct(u['false_answer_rate'])}) | "
                        f"{pct(u.get('wrongdoc'))} | {pct(u.get('shiftyear'))} |")
 
     pb = runs.get("pathb-27b-full")

@@ -43,3 +43,8 @@ ARM=r0 bash pace/submit.sh final    # all questions with the chosen configuratio
 
 ### 2026-11-11: 27B dropped (user decision)
 The 27B jobs waited more than a day for an 80 GB GPU. The user chose to skip 27B. Cancelled jobs: q27-dev 6962456, q27-all 6962502, v27 6962503, judge (gpt-oss-120b) 6962504, publish 6962505. The experiment now compares Qwen3.5 2B and 9B only. The verifier is Gemma 4 12B and the judge is gpt-oss-20b, both on the Blackwell partition. A larger answer model (27B or more), a larger verifier and the 120b judge go to future scope. Dev round 1 27B results (already graded) stay in the interim report as a reference point only.
+
+### 2026-11-11: 27B back in, as FP8 on Blackwell (user request)
+- First try: Qwen3.5-27B bf16 with tensor parallel 2 on two Blackwell GPUs. Failed with an NCCL error: ICE Blackwell GPUs are MIG partitions (47 GB each), and NCCL cannot join two MIG instances.
+- Switched to the official `Qwen/Qwen3.5-27B-FP8` (31 GB), one partition. Six pass-1 runs in parallel jobs (full, bare, oracle, unans full, unans bare, Path B). Two crashed at server start with "Stale file handle" from a shared vLLM compile cache on NFS. Fix: `VLLM_CACHE_ROOT` on node-local disk (`pace/env.sh`), reran.
+- Then Gemma 4 12B verifier and gpt-oss-20b judge, same as 2B/9B. Official config stays 9B full (dev wrong count 5 vs 10 for 27B).

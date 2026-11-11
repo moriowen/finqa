@@ -2,6 +2,9 @@
 
 | Model | Setting | Correct | Wrong | Refused | Wrong-answer rate [95% CI] | Coverage | Selective accuracy | Page hit | Test only (99): wrong / correct |
 |---|---|---|---|---|---|---|---|---|---|
+| Qwen3.5-27B (FP8) | bare | 100 | 49 | 1 | 33% [25 to 40] | 99% | 67% | n/a | 32% / 67% |
+| Qwen3.5-27B (FP8) | full | 76 | 24 | 50 | 16% [10 to 22] | 67% | 76% | 85% | 14% / 51% |
+| Qwen3.5-27B (FP8) | oracle | 89 | 16 | 45 | 11% [6 to 15] | 70% | 85% | 100% | 10% / 57% |
 | Qwen3.5-9B | bare | 91 | 59 | 0 | 39% [31 to 47] | 100% | 61% | n/a | 38% / 62% |
 | Qwen3.5-9B | full | 71 | 17 | 62 | 11% [7 to 17] | 59% | 81% | 84% | 12% / 45% |
 | Qwen3.5-9B | full-gloss | 61 | 17 | 72 | 11% [7 to 17] | 52% | 78% | 86% | 13% / 39% |
@@ -15,12 +18,20 @@
 
 | Model | Setting | False answers | Wrong filing | Shifted year |
 |---|---|---|---|---|
+| Qwen3.5-27B (FP8) | bare | 22/290 (8%) | 7% | 9% |
+| Qwen3.5-27B (FP8) | full | 12/290 (4%) | 7% | 1% |
 | Qwen3.5-9B | bare | 20/290 (7%) | 5% | 9% |
 | Qwen3.5-9B | full | 1/290 (0%) | 0% | 1% |
 | Qwen3.5-9B | full-gloss | 2/290 (1%) | 1% | 1% |
 | Qwen3.5-2B | bare | 53/290 (18%) | 17% | 20% |
 | Qwen3.5-2B | full | 0/290 (0%) | 0% | 0% |
 | Qwen3.5-2B | full-gloss | 2/290 (1%) | 1% | 0% |
+
+### Path B: no filing given (27B, full harness)
+
+| Correct | Wrong | Refused | Wrong-answer rate | Coverage |
+|---|---|---|---|---|
+| 72 | 20 | 58 | 13% | 61% |
 
 ### FinanceBench paper baselines (human labels, same 150 questions)
 
@@ -40,6 +51,9 @@
 | Run | Checked | Accepted correct | Accepted wrong (leaks) | Rejected correct (lost) | Rejected wrong (caught) |
 |---|---|---|---|---|---|
 | all-9b-full | 97 | 70 | 18 | 1 | 8 |
+| all-27b-full | 106 | 79 | 22 | 1 | 4 |
+| all-27b-oracle | 119 | 88 | 19 | 5 | 7 |
+| pathb-27b-full | 165 | 119 | 35 | 1 | 10 |
 | all-9b-full-gloss | 85 | 61 | 17 | 1 | 6 |
 | all-9b-oracle | 96 | 72 | 18 | 2 | 4 |
 | all-2b-full | 18 | 12 | 2 | 1 | 3 |
@@ -76,6 +90,9 @@ Agreement 79%. Judge says *correct* when humans say *incorrect*: 5%. Judge says 
 | Run | LLM calls | LLM seconds | Tokens |
 |---|---|---|---|
 | all-9b-full | 2.2 | 58.7 | 17,561 |
+| all-27b-bare | 1.0 | 69.6 | 11,031 |
+| all-27b-full | 2.3 | 189.5 | 19,907 |
+| all-27b-oracle | 2.5 | 58.2 | 5,968 |
 | all-9b-bare | 1.0 | 30.7 | 11,014 |
 | all-9b-full-gloss | 2.2 | 59.8 | 18,242 |
 | all-9b-oracle | 2.2 | 25.4 | 4,932 |
