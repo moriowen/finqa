@@ -3,63 +3,89 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FinanceBench answer viewer</title>
+<title>FinanceBench QA demo</title>
 <style>
-  :root { --line:#ccc; --muted:#555; --hl:#fff3a8; }
-  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; margin: 0; color:#111; background:#fff; }
-  header { padding: 10px 16px; border-bottom: 1px solid var(--line); }
-  header h1 { font-size: 18px; margin: 0 0 4px; }
-  header p { margin: 0 0 8px; color: var(--muted); }
-  .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-  select, input { font: inherit; padding: 3px 5px; }
-  main { display:grid; grid-template-columns: 360px 1fr; height: calc(100vh - 120px); }
-  #list { overflow:auto; border-right:1px solid var(--line); }
-  #list div.item { padding:6px 10px; border-bottom:1px solid #eee; cursor:pointer; }
-  #list div.item:hover { background:#f5f5f5; }
-  #list div.item.sel { background:#e8eefb; }
-  #list .q { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  #detail { overflow:auto; padding: 12px 20px 40px; }
-  .tag { display:inline-block; font-size:11px; padding:1px 5px; border:1px solid #999; border-radius:3px; margin-right:4px; }
-  .ANSWER { background:#e6f4ea; border-color:#3c8d5a; } .NOT_FOUND { background:#fdecea; border-color:#c0392b; }
-  .AMBIGUOUS { background:#fff6d6; border-color:#b8962e; } .BARE { background:#eee; }
-  .correct { color:#1e7b3a; } .incorrect { color:#c0392b; } .refusal { color:#666; }
-  h2 { font-size: 16px; margin: 0 0 6px; } h3 { font-size: 14px; margin: 18px 0 6px; border-bottom:1px solid #eee; }
-  .meta { color: var(--muted); margin-bottom: 8px; }
-  .answer { font-size: 15px; background:#fafafa; border:1px solid #eee; padding:8px 10px; }
-  code, pre { font-family: Menlo, Consolas, monospace; font-size: 12px; }
-  pre { background:#fafafa; border:1px solid #eee; padding:6px 8px; max-height: 260px; overflow:auto; white-space:pre-wrap; }
-  pre mark { background: var(--hl); }
-  .ev { border:1px solid var(--line); padding:8px 10px; margin-bottom:10px; }
-  .ev .row { display:grid; grid-template-columns: 1fr 260px; gap: 12px; }
-  .ev img { width: 100%; border:1px solid var(--line); cursor: zoom-in; }
-  details { margin-top: 6px; } summary { cursor:pointer; color:#234; }
-  table { border-collapse: collapse; } td { padding: 2px 8px 2px 0; vertical-align: top; }
-  #overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; align-items:flex-start; justify-content:center; overflow:auto; z-index:9; }
-  #overlay img { max-width: 900px; width: 95%; margin: 20px 0; background:#fff; }
-  #flow { display:none; padding: 10px 16px; border-bottom:1px solid var(--line); }
-  #flow img { max-width: 760px; width: 100%; }
-  @media (max-width: 800px) { main { grid-template-columns: 1fr; height:auto; } #list { max-height: 40vh; } .ev .row { grid-template-columns: 1fr; } }
+  :root { --line:#ddd; --muted:#666; --accent:#2d4f9e; --ok:#1e7b3a; --bad:#c0392b; --warn:#9a7a1c; --bg:#fafafa; }
+  * { box-sizing: border-box; }
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.45; margin: 0; color:#111; background:#fff; }
+  header { padding: 14px 24px 0; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 20px; margin: 0 0 2px; }
+  header p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+  nav button { font: inherit; border: 0; background: none; padding: 8px 14px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; }
+  nav button.on { color: #111; border-bottom-color: var(--accent); font-weight: 600; }
+  section { display: none; padding: 20px 24px 60px; max-width: 1100px; }
+  section.on { display: block; }
+  .muted { color: var(--muted); font-size: 13px; }
+  select, input, button.run { font: inherit; padding: 6px 8px; }
+  button.run { background: var(--accent); color: #fff; border: 0; border-radius: 4px; padding: 7px 18px; cursor: pointer; }
+  .picker { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin: 8px 0 18px; }
+  .picker select { min-width: 520px; max-width: 100%; }
+  .qbox { font-size: 17px; padding: 12px 14px; background: var(--bg); border-left: 3px solid var(--accent); margin-bottom: 16px; }
+  .step { display:grid; grid-template-columns: 34px 1fr; gap: 10px; margin-bottom: 12px; opacity: 0; transform: translateY(4px); transition: all .25s; }
+  .step.show { opacity: 1; transform: none; }
+  .num { width: 28px; height: 28px; border-radius: 50%; background: #e8eefb; color: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 600; font-size: 13px; }
+  .step.fail .num { background: #fdecea; color: var(--bad); }
+  .step h3 { margin: 3px 0 2px; font-size: 15px; }
+  .step .what { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+  .result { font-size: 14px; }
+  .pill { display:inline-block; font-size: 12px; padding: 1px 7px; border-radius: 10px; border: 1px solid; margin-right: 4px; }
+  .ANSWER { color: var(--ok); } .NOT_FOUND { color: var(--bad); } .AMBIGUOUS { color: var(--warn); } .BARE { color: #555; }
+  .correct { color: var(--ok); } .incorrect { color: var(--bad); } .refusal { color: #555; }
+  .final { border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; margin-top: 8px; }
+  .final .ans { font-size: 16px; margin: 6px 0; }
+  .truth { background: var(--bg); border-radius: 6px; padding: 10px 14px; margin-top: 14px; font-size: 14px; }
+  details { margin-top: 6px; } summary { cursor: pointer; color: var(--accent); font-size: 13px; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 12.5px; }
+  pre { font-family: Menlo, Consolas, monospace; font-size: 12px; background: var(--bg); border: 1px solid #eee; padding: 8px; max-height: 240px; overflow: auto; white-space: pre-wrap; }
+  pre mark { background: #fff3a8; }
+  table.vals { border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  table.vals td, table.vals th { border-bottom: 1px solid #eee; padding: 3px 10px 3px 0; text-align: left; vertical-align: top; }
+  .ev { display:grid; grid-template-columns: 1fr 200px; gap: 14px; border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; }
+  .ev img { width: 100%; border: 1px solid var(--line); cursor: zoom-in; }
+  #overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; justify-content:center; overflow:auto; z-index:9; }
+  #overlay img { max-width: 900px; width: 95%; margin: 20px 0; background:#fff; align-self:flex-start; }
+  /* browse */
+  .browse { display:grid; grid-template-columns: 340px 1fr; gap: 20px; }
+  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 12px; }
+  #list { border: 1px solid var(--line); border-radius: 6px; max-height: 72vh; overflow: auto; }
+  #list .item { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 14px; }
+  #list .item:hover { background: var(--bg); } #list .item.sel { background: #e8eefb; }
+  #list .item small { color: var(--muted); }
+  .flow img { width: 100%; max-width: 900px; }
+  @media (max-width: 820px) { .browse { grid-template-columns: 1fr; } .ev { grid-template-columns: 1fr; } .picker select { min-width: 0; width: 100%; } section { padding: 16px; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>FinanceBench answer viewer</h1>
-  <p>Every question, the system's answer, and the evidence it cites: filing, PDF page, quote, the page text it read, and an image of the page. Pick a question on the left.
-     <a href="#" id="flowlink">How the system works</a> · <a href="../README.md">README</a></p>
-  <div class="controls">
-    <label>Run <select id="run"></select></label>
-    <label>Status <select id="status"><option value="">all</option><option>ANSWER</option><option>NOT_FOUND</option><option>AMBIGUOUS</option><option>BARE</option></select></label>
-    <label>Judge <select id="judge"><option value="">all</option><option>correct</option><option>incorrect</option><option>refusal</option></select></label>
-    <label>Split <select id="split"><option value="">all</option><option>dev</option><option>test</option></select></label>
-    <input id="search" placeholder="search question or company" size="28">
-    <span id="count"></span>
-  </div>
+  <h1>FinanceBench QA with provenance</h1>
+  <p>Answers questions about SEC filings and shows the page and quote behind every answer. If it cannot check the evidence, it does not answer.</p>
+  <nav><button data-tab="try" class="on">Try a question</button><button data-tab="browse">Browse all 150 answers</button><button data-tab="flow">How the system works</button></nav>
 </header>
-<div id="flow"><img src="../docs/diagrams/system-flow.svg" alt="System flow diagram"></div>
-<main>
-  <div id="list"></div>
-  <div id="detail"><p>Pick a question.</p></div>
-</main>
+
+<section id="try" class="on">
+  <div class="picker">
+    <select id="preset"></select>
+    <button class="run" id="go">Run</button>
+  </div>
+  <p class="muted">Each run replays a recorded run of the real system (Qwen3.5-9B answering, Gemma 4 12B verifying, on Georgia Tech's ICE GPUs). No model runs in your browser. The steps appear in the order the system ran them.</p>
+  <div id="trace"></div>
+</section>
+
+<section id="browse">
+  <div class="filters">
+    <select id="run"></select>
+    <select id="status"><option value="">Any status</option><option>ANSWER</option><option>NOT_FOUND</option><option>AMBIGUOUS</option><option>BARE</option></select>
+    <select id="judge"><option value="">Any grade</option><option>correct</option><option>incorrect</option><option>refusal</option></select>
+    <input id="search" placeholder="Search question or company">
+  </div>
+  <div class="browse"><div id="list"></div><div id="detail"><p class="muted">Pick a question on the left.</p></div></div>
+</section>
+
+<section id="flow" class="flow">
+  <p class="muted">Every stage, the technology it uses, and the decision behind it. Red marks where the system refuses instead of guessing.</p>
+  <img src="system-flow.svg" alt="System flow: index, route, retrieve, extract, check, answer, verify, combine, output">
+</section>
+
 <div id="overlay"><img alt=""></div>
 <script src="data.js"></script>
 <script>
@@ -67,86 +93,131 @@ const D = window.DATA, Q = Object.fromEntries(D.questions.map(q => [q.qid, q]));
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const norm = s => String(s ?? "").replace(/[\s|]+/g, "").toLowerCase();
-let sel = null;
+const pill = s => `<span class="pill ${s}">${s === "NOT_FOUND" ? "NO ANSWER (NOT_FOUND)" : s}</span>`;
 
-D.runs.forEach((r, i) => $("run").add(new Option(r.label, i)));
-["run","status","judge","split"].forEach(id => $(id).onchange = render);
-$("search").oninput = render;
-$("flowlink").onclick = e => { e.preventDefault(); const f = $("flow"); f.style.display = f.style.display === "block" ? "none" : "block"; };
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button, section").forEach(e => e.classList.remove("on"));
+  b.classList.add("on"); $(b.dataset.tab).classList.add("on");
+});
 $("overlay").onclick = () => $("overlay").style.display = "none";
-
-function run() { return D.runs[$("run").value]; }
-
-function render() {
-  const R = run(), st = $("status").value, jd = $("judge").value, sp = $("split").value, s = $("search").value.toLowerCase();
-  const items = D.questions.filter(q => {
-    const r = R.rows[q.qid]; if (!r) return false;
-    return (!st || r.status === st) && (!jd || r.judge === jd) && (!sp || q.split === sp) &&
-      (!s || (q.question + " " + q.doc).toLowerCase().includes(s));
-  });
-  $("count").textContent = items.length + " of " + D.questions.length + " questions";
-  $("list").innerHTML = items.map((q, i) => {
-    const r = R.rows[q.qid];
-    return `<div class="item ${q.qid === sel ? "sel" : ""}" data-q="${q.qid}">
-      <span class="tag ${r.status}">${r.status}</span><span class="${r.judge}">${r.judge ?? ""}</span>
-      <span class="q">${esc(q.question)}</span><small>${esc(q.doc)}</small></div>`;
-  }).join("");
-  $("list").querySelectorAll(".item").forEach(el => el.onclick = () => { sel = el.dataset.q; render(); show(); });
-  if (sel) show();
-}
+function zoom(src) { $("overlay").querySelector("img").src = src; $("overlay").style.display = "flex"; }
 
 function passage(p) {
   const qn = norm(p.quote);
-  return (p.passage || "").split("\n").map(l => {
-    const ln = norm(l);
-    return ln && (qn.includes(ln) && ln.length > 6 || ln.includes(qn)) ? `<mark>${esc(l)}</mark>` : esc(l);
-  }).join("\n");
+  return (p.passage || "").split("\n").map(l => { const ln = norm(l);
+    return ln && ((qn.includes(ln) && ln.length > 6) || ln.includes(qn)) ? `<mark>${esc(l)}</mark>` : esc(l); }).join("\n");
 }
-
 function evidence(ps) {
-  return ps.map(p => `<div class="ev"><div class="row"><div>
-      <b>${esc(p.id ?? "")}</b> · <code>${esc(p.doc)}</code> · PDF page <b>${p.page}</b>
-      ${p.column ? " · column " + esc(p.column) : ""}${p.scale ? " · " + esc(p.scale) : ""}
-      <div>Quote: <code>${esc(p.quote)}</code></div>
-      <details open><summary>Page text the model read (quote highlighted)</summary><pre>${passage(p)}</pre></details>
-    </div><div><img src="${p.img}" alt="page ${p.page}" loading="lazy" onclick="zoom('${p.img}')"><small>Click to enlarge</small></div></div></div>`).join("");
+  return ps.map(p => `<div class="ev"><div>
+    <b>${esc(p.id ?? "")}</b> <code>${esc(p.doc)}</code>, PDF page <b>${p.page}</b>${p.column ? ", column " + esc(p.column) : ""}${p.scale ? ", " + esc(p.scale) : ""}
+    <div>Quote: <code>${esc(p.quote)}</code></div>
+    <details><summary>Page text the model read (quote highlighted)</summary><pre>${passage(p)}</pre></details></div>
+    <div><img src="${p.img}" alt="PDF page ${p.page}" loading="lazy" onclick="zoom('${p.img}')"></div></div>`).join("");
 }
 
-function zoom(src) { const o = $("overlay"); o.querySelector("img").src = src; o.style.display = "flex"; }
+/* ---------- Try a question ---------- */
+const cats = [...new Set(D.presets.map(p => p.category))];
+$("preset").innerHTML = cats.map(c => `<optgroup label="${esc(c)}">` + D.presets.map((p, i) => p.category === c ?
+  `<option value="${i}">${esc(c)}: ${esc(p.question.length > 95 ? p.question.slice(0, 92) + "..." : p.question)}</option>` : "").join("") + "</optgroup>").join("");
+$("go").onclick = play;
 
-function show() {
-  const q = Q[sel], r = run().rows[sel]; if (!q || !r) return;
-  let h = `<h2>${esc(q.question)}</h2>
-    <div class="meta">${esc(q.qid)} · filing in the dataset <code>${esc(q.doc)}</code> · ${esc(q.type)} · ${q.split} split</div>
-    <span class="tag ${r.status}">${r.status}</span>`;
-  if (r.answer) h += `<h3>Answer</h3><div class="answer">${esc(r.answer)}</div>`;
-  if (r.computation) h += `<h3>Computation (done by Python, not the model)</h3><code>${esc(r.computation)}</code>`;
-  if (r.status === "BARE") h += `<p class="meta">Bare run: one prompt, no checks, no extracted evidence. Shown for comparison only.</p>`;
-  if (r.provenance.length) h += `<h3>Provenance (attached by code from checked values)</h3>` + evidence(r.provenance);
-  if (r.reason && r.status !== "ANSWER") h += `<h3>Why the system did not answer</h3><p>${esc(r.reason)}</p>`;
-  else if (r.reason) h += `<p class="meta">${esc(r.reason)}</p>`;
-  (r.alternatives || []).forEach(a => h += `<h3>Candidate answer from <code>${esc(a.doc)}</code></h3><div class="answer">${esc(a.answer)}</div>` + evidence(a.provenance));
-  if (r.verifier) {
-    const v = r.verifier;
-    h += `<h3>Verifier (${esc(r.models?.verifier)}, sees page images)</h3><table>
-      <tr><td>Decision</td><td><b>${v.pass ? "accepted" : "rejected"}</b></td></tr>
-      <tr><td>Period correct</td><td>${v.period_ok}</td></tr><tr><td>Unit correct</td><td>${v.unit_ok}</td></tr>
-      <tr><td>Value in the right column</td><td>${v.value_in_correct_column}</td></tr><tr><td>Answer supported</td><td>${esc(v.answer_supported)}</td></tr>
-      ${v.problem ? `<tr><td>Problem noted</td><td>${esc(v.problem)}</td></tr>` : ""}</table>`;
+function steps(p) {
+  const S = [];
+  if (p.path_b) {
+    const r = p.route || {};
+    S.push({ t: "Route the question", w: "No filing is named, so an LLM picks the company from the 42 in the corpus. Code then filters filings by period and type.",
+      r: `Company <b>${esc(r.company ?? "?")}</b>${r.years?.length ? ", years " + r.years.join(", ") : ""}${r.doc_type && r.doc_type !== "none" ? ", type " + esc(r.doc_type) : ""}.
+          Candidate filings: ${(p.candidates || []).map(c => "<code>" + esc(c) + "</code>").join(", ") || "<b>none</b>"}`,
+      fail: !(p.candidates || []).length });
+  } else {
+    S.push({ t: "Filing given", w: "The question comes with its filing, so no routing is needed.", r: `<code>${esc(p.filings[0]?.doc)}</code>` });
   }
-  if (r.candidates && r.candidates.length > 1 || run().id.startsWith("pathb")) h += `<h3>Router (Path B): candidate filings</h3><p>${(r.candidates || []).map(c => "<code>" + esc(c) + "</code>").join(", ") || "none"}</p>`;
-  if (r.searched) h += `<h3>Pages searched</h3><p>${r.searched.map(s => `<code>${esc(s.doc)}</code>: ${s.pages.join(", ")}`).join("<br>")}</p>`;
-  h += `<h3>Models</h3><p>Answer: <code>${esc(r.models?.answer)}</code> · Verifier: <code>${esc(r.models?.verifier ?? "none")}</code></p>`;
-  const cited = r.provenance.map(p => p.page), hit = r.provenance.some(p => p.doc === q.doc && q.gold_pages.includes(p.page));
-  h += `<details><summary>Evaluation only (the system never sees this): judge label, gold answer, gold pages</summary>
-    <table><tr><td>Judge label</td><td class="${r.judge}"><b>${r.judge ?? "n/a"}</b></td></tr>
-    <tr><td>Gold answer</td><td>${esc(q.gold_answer)}</td></tr>
-    <tr><td>Gold justification</td><td>${esc(q.gold_justification)}</td></tr>
-    <tr><td>Gold evidence pages</td><td>${q.gold_pages.join(", ")} ${cited.length ? (hit ? "· a cited page is a gold page" : "· no cited page is a gold page") : ""}</td></tr></table></details>`;
-  $("detail").innerHTML = h;
-  $("detail").scrollTop = 0;
+  p.filings.forEach((f, fi) => {
+    const pre = p.filings.length > 1 ? `[${esc(f.doc)}] ` : "";
+    S.push({ t: pre + "Retrieve pages", w: "Statement pages + BM25 keyword search + embedding search, at most 12 pages, read as layout text.",
+      r: `Pages shown to the model: ${f.pages.join(", ")}` });
+    f.steps.forEach(s => {
+      if (s.call === 1) {
+        const v = s.values.length ? `<table class="vals"><tr><th>value</th><th>raw</th><th>period</th><th>page</th><th>quote</th></tr>` +
+          s.values.map(x => `<tr><td><code>${esc(x.name)}</code></td><td>${esc(x.raw)} ${esc(x.scale)}</td><td>${esc(x.period)}</td><td>${x.page}</td><td><code>${esc(x.quote)}</code></td></tr>`).join("") + "</table>" : "";
+        S.push({ t: pre + "Call 1: extract values (Qwen3.5-9B)", w: "The model returns JSON: each value with page, quote, column and period, plus a formula. It does no arithmetic.",
+          r: (s.status === "found" ? `Found ${s.values.length} value(s). Formula: <code>${esc(s.formula)}</code>` : `Model says: <b>${esc(s.status)}</b>`) + v +
+             (s.reason ? `<details><summary>Model's note</summary><p>${esc(s.reason)}</p></details>` : ""), fail: s.status !== "found" });
+        S.push({ t: pre + "Code checks", w: "Is each quote on its page? Is the value inside the quote? Does the formula use only allowed functions?",
+          r: s.errors.length ? `Failed: ${s.errors.map(esc).join("; ")}. The model gets one retry with this error.` : (s.status === "found" ? "All checks passed. Python computes the formula." : "Nothing to check."),
+          fail: s.errors.length > 0 });
+      } else if (s.call === 2) {
+        S.push({ t: pre + "Call 2: write the answer", w: "Plain text that cites values as [v1]. Code checks that every number is a checked value or the computed result.",
+          r: (s.answer ? `"${esc(s.answer)}"` : "(empty)") + (s.errors.length ? `<br>Number check failed: ${s.errors.map(esc).join("; ")}` : "<br>Number check passed."),
+          fail: s.errors.length > 0 });
+      }
+    });
+    if (f.computation) S.splice(S.length - 1, 0, { t: pre + "Python computes", w: "The formula runs on the checked values.", r: `<code>${esc(f.computation)}</code>` });
+    if (f.verifier) {
+      const v = f.verifier;
+      S.push({ t: pre + "Verifier (Gemma 4 12B, sees page images)", w: "A model from another family checks period, unit, column and support on images of the cited pages.",
+        r: `<b>${v.pass ? "Accepted" : "Rejected"}</b>. Period ${v.period_ok ? "ok" : "wrong"}, unit ${v.unit_ok ? "ok" : "wrong"}, column ${v.value_in_correct_column ? "ok" : "wrong"}, supported: ${esc(v.answer_supported)}.` +
+           (v.problem ? `<br>${esc(v.problem)}` : ""), fail: !v.pass });
+    }
+  });
+  if (p.path_b && p.filings.length > 1) S.push({ t: "Combine candidate filings", w: "If filings disagree, the system returns AMBIGUOUS instead of choosing.", r: pill(p.final.status) });
+  return S;
 }
-render();
+
+function finalCard(p) {
+  const f = p.final, t = p.truth || {};
+  let h = `<div class="final">${pill(f.status)}`;
+  if (f.answer) h += `<div class="ans">${esc(f.answer)}</div>`;
+  if (f.computation) h += `<div class="muted">Computed: <code>${esc(f.computation)}</code></div>`;
+  if (f.status !== "ANSWER" && f.reason) h += `<div class="muted">Why no answer: ${esc(f.reason)}</div>`;
+  if (f.provenance.length) h += `<div style="margin-top:8px"><b>Provenance</b></div>` + evidence(f.provenance);
+  f.alternatives.forEach(a => h += `<div style="margin-top:10px"><b>Candidate from <code>${esc(a.doc)}</code>:</b> ${esc(a.answer)}</div>` + evidence(a.provenance));
+  h += `</div><div class="truth"><b>Reference (not seen by the system):</b> ${esc(t.answer)}<br><span class="muted">${esc(t.source)}${t.judge ? ` · grade: <span class="${t.judge}">${t.judge}</span>` : ""}</span>` +
+       (t.note ? `<br><span class="muted">About this filing: ${esc(t.note)}</span>` : "") + `</div>`;
+  return h;
+}
+
+let timer;
+function play() {
+  clearTimeout(timer);
+  const p = D.presets[$("preset").value], S = steps(p);
+  $("trace").innerHTML = `<div class="qbox">${esc(p.question)}</div>` + S.map((s, i) => `<div class="step ${s.fail ? "fail" : ""}"><div class="num">${i + 1}</div><div>
+    <h3>${s.t}</h3><div class="what">${s.w}</div><div class="result">${s.r}</div></div></div>`).join("") +
+    `<div class="step"><div class="num">✓</div><div><h3>Final output</h3>${finalCard(p)}</div></div>`;
+  const els = [...$("trace").querySelectorAll(".step")];
+  els.forEach((e, i) => timer = setTimeout(() => e.classList.add("show"), 350 * i));
+}
+
+/* ---------- Browse ---------- */
+let sel = null;
+D.runs.forEach((r, i) => $("run").add(new Option(r.label, i)));
+["run", "status", "judge"].forEach(id => $(id).onchange = list); $("search").oninput = list;
+function list() {
+  const R = D.runs[$("run").value], st = $("status").value, jd = $("judge").value, s = $("search").value.toLowerCase();
+  const items = D.questions.filter(q => { const r = R.rows[q.qid];
+    return r && (!st || r.status === st) && (!jd || r.judge === jd) && (!s || (q.question + " " + q.doc).toLowerCase().includes(s)); });
+  $("list").innerHTML = items.map(q => { const r = R.rows[q.qid];
+    return `<div class="item ${q.qid === sel ? "sel" : ""}" data-q="${q.qid}"><span class="${r.status}">●</span> ${esc(q.question.slice(0, 90))}${q.question.length > 90 ? "..." : ""}<br><small>${esc(q.doc)} · ${r.status}${r.judge ? " · " + r.judge : ""}</small></div>`; }).join("")
+    || `<p class="muted" style="padding:10px">No questions match.</p>`;
+  $("list").querySelectorAll(".item").forEach(el => el.onclick = () => { sel = el.dataset.q; list(); detail(); });
+}
+function detail() {
+  const q = Q[sel], R = D.runs[$("run").value], r = R.rows[sel]; if (!q || !r) return;
+  let h = `<div class="qbox">${esc(q.question)}</div><div class="muted" style="margin-bottom:8px">Filing <code>${esc(q.doc)}</code> · ${esc(q.type)} · ${q.split} split</div><div class="final">${pill(r.status)}`;
+  if (r.answer) h += `<div class="ans">${esc(r.answer)}</div>`;
+  if (r.computation) h += `<div class="muted">Computed by Python: <code>${esc(r.computation)}</code></div>`;
+  if (r.status === "BARE") h += `<div class="muted">Bare run: one prompt, no checks, no evidence. Shown for comparison.</div>`;
+  if (r.status !== "ANSWER" && r.reason) h += `<div class="muted">Why no answer: ${esc(r.reason)}</div>`;
+  if (r.provenance.length) h += `<div style="margin-top:8px"><b>Provenance</b></div>` + evidence(r.provenance);
+  (r.alternatives || []).forEach(a => h += `<div style="margin-top:10px"><b>Candidate from <code>${esc(a.doc)}</code>:</b> ${esc(a.answer)}</div>` + evidence(a.provenance));
+  h += `</div>`;
+  if (r.verifier) { const v = r.verifier; h += `<details><summary>Verifier checks</summary><p>${v.pass ? "Accepted" : "Rejected"}. Period ${v.period_ok}, unit ${v.unit_ok}, column ${v.value_in_correct_column}, supported ${esc(v.answer_supported)}. ${esc(v.problem || "")}</p></details>`; }
+  if (r.searched) h += `<details><summary>Pages searched</summary><p>${r.searched.map(s => `<code>${esc(s.doc)}</code>: ${s.pages.join(", ")}`).join("<br>")}</p></details>`;
+  h += `<div class="truth"><b>Gold answer (not seen by the system):</b> ${esc(q.gold_answer)}<br><span class="muted">Grade: <span class="${r.judge}">${r.judge ?? "n/a"}</span> · gold pages ${q.gold_pages.join(", ")} · models: ${esc(r.models?.answer)}${r.models?.verifier ? ", " + esc(r.models.verifier) : ""}</span></div>`;
+  $("detail").innerHTML = h;
+}
+list();
+play();
 </script>
 </body>
 </html>
