@@ -8,3 +8,4 @@ __pycache__/
 data/
 # Generated indexes and caches
 artifacts/
+pace/logs/
