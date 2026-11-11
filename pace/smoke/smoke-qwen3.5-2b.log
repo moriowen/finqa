@@ -1,0 +1,34 @@
+---------------------------------------
+Begin Slurm Prolog: Nov-11-2026 02:46:33
+Job ID:    6952665
+User ID:   amohite8
+Account:   coc
+Job name:  finqa-smoke
+Partition: ice-gpu
+QOS:       coc-ice
+---------------------------------------
+node atl1-1-01-005-13-0.pace.gatech.edu job 6952665 start Wed Nov 11 02:46:34 EST 2026
+NVIDIA A100 80GB PCIe, 81920 MiB
+/dev/mapper/sysvg-scratch  1.7T   12G  1.7T   1% /tmp
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 13 files:   8%|▊         | 1/13 [00:00<00:01,  9.63it/s]Fetching 13 files:  92%|█████████▏| 12/13 [00:00<00:00, 16.11it/s]Fetching 13 files: 100%|██████████| 13/13 [00:05<00:00,  2.35it/s]
+downloaded /tmp/finqa-hf-6952665/hub/models--Qwen--Qwen3.5-2B/snapshots/15852e8c16360a2fea060d615a32b45270f8a8fc
+download 7 s, size 4.3G
+server up 373 s after start
+TEXT: '391' 0.27 s
+JSON: '{"value": "$4,210 million", "page": 12}' {'value': '$4,210 million', 'page': 12}
+IMAGE: '(1,577)' 0.39 s
+SMOKE PASS
+done Wed Nov 11 02:52:51 EST 2026
+---------------------------------------
+Begin Slurm Epilog: Nov-11-2026 02:52:52
+Job ID:        6952665
+User ID:       amohite8
+Account:       coc
+Job name:      finqa-smoke
+Resources:     cpu=8,gres/gpu:a100=1,mem=48G,node=1
+Rsrc Used:     cput=00:50:56,vmem=0,walltime=00:06:22,mem=13014604K,energy_used=0
+Partition:     ice-gpu
+QOS:           coc-ice
+Nodes:         atl1-1-01-005-13-0
+---------------------------------------

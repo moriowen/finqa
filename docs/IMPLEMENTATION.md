@@ -31,3 +31,4 @@ ARM=r0 bash pace/submit.sh final    # all questions with the chosen configuratio
 
 - 2026-11-11: parsed 368 PDFs (99 MB cache). Retrieval r0 on dev: recall 0.80 at about 12 pages. 27 tests pass.
 - 2026-11-11: ICE fair-share factor 0.012 (heavy recent usage on the account), so jobs wait. Jobs accept any GPU type that fits.
+- 2026-11-11 02:52: **smoke test passed** (job 6952665, A100 80GB, Qwen3.5-2B @ 15852e8, vLLM 0.32.0): text `391`, enforced JSON schema valid, image of 3M 2018 10-K page 60 read as `(1,577)`. Node-local `/tmp` has 1.7 TB; 4.3 GB downloaded in 7 s; server start about 6 min. Log: `pace/smoke/smoke-qwen3.5-2b.log`.
