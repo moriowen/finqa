@@ -48,8 +48,8 @@ Commit: `cc39aeb4afdf33909ee1412188bf89035950c2eb`.
 
 ## Open decisions
 
-- LLM provider and model. No API key is set yet. Copy `.env.example` to `.env` and add a key.
-- Scope of retrieval: use `doc_name` to search one document, or search all documents.
+- LLM provider: decided. Qwen models served with vLLM on PACE ICE. Exact model and size are open. See A14 in `docs/assumptions.md`.
+- Scope of retrieval: decided. Support both paths (`doc_name` given, and not given). See A1 in `docs/assumptions.md`.
 - Embedding model. It is not installed yet because it depends on the design.
 
 ## Environment
