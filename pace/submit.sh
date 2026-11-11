@@ -1,7 +1,8 @@
 #!/bin/bash
 # Submit one stage of the experiment plan as a dependency chain (A21). From ~/scratch/finqa on ICE:
 #   bash pace/submit.sh dev      # dev split: embeddings, pass 0, sweep runs, verifier, judge, E3
-#   bash pace/submit.sh final    # all questions with the chosen configuration (set ARM, GLOSS, THINK)
+#   bash pace/submit.sh final    # all questions with the chosen configuration (set ARM, GLOSS, THINK, IMAGES, MAIN)
+#   bash pace/submit.sh auto     # CPU job after DEP (the dev judge job): autopilot decides, then submits final + publish
 set -euo pipefail
 cd "$(dirname "$0")/.."
 STAGE="${1:?dev or final}"
@@ -34,7 +35,7 @@ for r in dev-27b-full-r0 dev-27b-bare-r0 dev-27b-oracle dev-27b-oracle-img dev-9
 for r in dev-27b-full-r0 dev-9b-full-r0 dev-2b-full-r0; do $J --run \$r --thinking; done" "$v" "" 32768 6:00:00)
   echo "emb $e | q27 $a | q9 $b | q2 $c | verifier $v | judge $j"
 elif [ "$STAGE" = final ]; then
-  ARM="${ARM:-r0}"; G="${GLOSS:+--glossary}"; T="${THINK:+--thinking}"
+  ARM="${ARM:-r0}"; G="${GLOSS:+--glossary}${IMAGES:+ --images}"; T="${THINK:+--thinking}"
   run() { echo "$P1 --run all-$1-full --set all --arm $ARM $G && $P1 --run all-$1-bare --set all --mode bare --arm $ARM && \
 $P1 --run all-$1-oracle --set all --mode oracle $G && $P1 --run unans-$1-full --set all --unans --arm $ARM $G && \
 $P1 --run unans-$1-bare --set all --unans --mode bare --arm $ARM"; }
@@ -45,5 +46,11 @@ $P1 --run unans-$1-bare --set all --unans --mode bare --arm $ARM"; }
   BARE="all-27b-bare unans-27b-bare all-9b-bare unans-9b-bare all-2b-bare unans-2b-bare"
   v=$(sub v27-all "$BIG" $Q27 "for r in $RUNS; do python -m finqa.cli pass2 --run \$r $T; done; for r in $BARE; do python -m finqa.cli finalize --run \$r; done" "$a:$b:$c" "$VL" 32768 8:00:00)
   j=$(sub judge-all "$BIG" $JUDGE "for r in $RUNS $BARE; do python -m finqa.evals.judge run --run \$r $T; done" "$v" "" 32768 8:00:00)
-  echo "q27 $a | q9 $b | q2 $c | verifier $v | judge $j"
+  F=""; [ -n "$T" ] && F="--thinking"
+  p=$(sbatch --parsable -J publish --dependency=afterany:$j --export=ALL,CMD="python -m finqa.evals.dev_analysis > runs/dev_analysis.json; \
+python -m finqa.evals.publish --main all-${MAIN:-27b}-full --runs $RUNS $BARE > runs/publish.log 2>&1" pace/cpu.sbatch)
+  echo "q27 $a | q9 $b | q2 $c | verifier $v | judge $j | publish $p"
+elif [ "$STAGE" = auto ]; then
+  sbatch --parsable -J autopilot ${DEP:+--dependency=afterany:$DEP} --export=ALL,CMD="python -m finqa.evals.autopilot > runs/decisions.env && \
+set -a && source runs/decisions.env && set +a && bash pace/submit.sh final > runs/final_jobs.txt" pace/cpu.sbatch
 fi
