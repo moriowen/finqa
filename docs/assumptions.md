@@ -525,6 +525,20 @@ The full architecture and the impact of each assumption change are in [`architec
 - **Limitation for the write-up:** the compute limit decided the verifier and judge sizes, not the dev results.
 - **Future scope (more compute):** 27B or larger answering model; a large verifier from another family; gpt-oss-120b as the judge for every run; verifier thinking on; several samples per question with agreement voting; retrieval arm R3 with a larger page budget.
 
+## A24. Scoring: a wrong answer costs more than a correct answer earns
+
+- **Status:** Assumption confirmed by the user (2026-11-11). The scoring rule is still open (see "Options").
+- **Assumption:** this is a sensitive setting (finance). A wrong answer that looks right does more harm than a correct answer does good. No answer is better than a wrong answer. So the score must penalize a wrong answer more than it rewards a correct one, and an abstention scores zero.
+- **Why it matters now:** with the wrong-answer rate alone, a model that answers less looks better. 27B gets more answers right than 9B (76 against 71) but also more wrong (24 against 17), and the ranking depends on how much a wrong answer costs.
+- **Options (standard practice):**
+  1. Report correct, wrong and refused as three numbers, with no single score. The FinanceBench paper and SimpleQA report results this way.
+  2. Cost-weighted score, called "effective reliability" in Whitehead et al. (2022, "Reliable Visual Question Answering: Abstain Rather Than Answer Incorrectly"): score = (correct − c × wrong) / N, abstention = 0. c is the cost of one wrong answer measured in correct answers. Kalai et al. (2025, "Why Language Models Hallucinate") argue for the same idea with an explicit confidence target t, where a wrong answer costs t / (1 − t).
+  3. Risk-coverage (selective prediction): the highest coverage at which the wrong rate among answered questions stays under a fixed limit. This needs a confidence score per answer, which the system does not produce yet.
+  4. A hard limit: maximize coverage subject to a wrong-answer rate below X%, using the upper end of the confidence interval.
+- **Useful fact:** with option 2, an answer helps the score only if the system is right more often than c / (c + 1) of the time on the questions it answers. For c = 1 that is 50%, for c = 5 it is 83%, for c = 10 it is 91%.
+- **Rule:** choose c (or the limit) from the setting, not from which model wins, and report the score at several values of c.
+- **If false (wrong and correct weigh the same):** use plain accuracy, and the larger model wins.
+
 ## A7. Acceptable wrong-answer rate
 
 - **Status:** Decided (2026-11-11). There is no hard target. Keep the wrong-answer rate as low as possible, and report the full trade-off curve.
