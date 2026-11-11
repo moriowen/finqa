@@ -2,7 +2,7 @@
 title: "Financial Document QA on FinanceBench"
 ---
 
-Code, full results and all 150 answers with provenance: github.com/moriowen/finqa (README and results/answers.md).
+Live demo: finqa-demo.vercel.app (step-by-step replay of the system on sample questions, and all 150 answers with their cited pages). Code and full results: github.com/moriowen/finqa. The system diagram is on page 3.
 
 I set one rule before designing anything: a wrong answer is worse than no answer. If the system cannot point to evidence that it has checked, it returns NOT_FOUND and gives the reason. Results are reported as correct, wrong and refused, and the main number is the wrong-answer rate.
 
@@ -26,7 +26,7 @@ Models: Qwen3.5 at 2B, 9B and 27B (27B in FP8), served with vLLM on Georgia Tech
 
 ## 2. Answers with provenance
 
-The official configuration is Qwen3.5-9B with the full pipeline, chosen on the dev questions because it had the fewest wrong answers. Every answer and refusal, with page, quote and passage, is in results/answers.md. Totals over the 150 questions:
+The official configuration is Qwen3.5-9B with the full pipeline, chosen on the dev questions because it had the fewest wrong answers. Every answer and refusal, with page, quote, passage and an image of the cited page, is in the demo and in results/answers.md. Totals over the 150 questions:
 
 | Setup | Correct | Wrong | Refused | Wrong-answer rate |
 |---|---|---|---|---|
