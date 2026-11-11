@@ -527,7 +527,7 @@ The full architecture and the impact of each assumption change are in [`architec
 
 ## A24. Scoring: a wrong answer costs more than a correct answer earns
 
-- **Status:** Assumption confirmed by the user (2026-11-11). The scoring rule is still open (see "Options").
+- **Status:** Assumption confirmed by the user (2026-11-11). **Decision (user, 2026-11-11): option 1.** Results are reported as three counts (correct, wrong, refused) for every configuration. No cost-weighted score.
 - **Assumption:** this is a sensitive setting (finance). A wrong answer that looks right does more harm than a correct answer does good. No answer is better than a wrong answer. So the score must penalize a wrong answer more than it rewards a correct one, and an abstention scores zero.
 - **Why it matters now:** with the wrong-answer rate alone, a model that answers less looks better. 27B gets more answers right than 9B (76 against 71) but also more wrong (24 against 17), and the ranking depends on how much a wrong answer costs.
 - **Options (standard practice):**
@@ -538,6 +538,7 @@ The full architecture and the impact of each assumption change are in [`architec
 - **Useful fact:** with option 2, an answer helps the score only if the system is right more often than c / (c + 1) of the time on the questions it answers. For c = 1 that is 50%, for c = 5 it is 83%, for c = 10 it is 91%.
 - **Rule:** choose c (or the limit) from the setting, not from which model wins, and report the score at several values of c.
 - **If false (wrong and correct weigh the same):** use plain accuracy, and the larger model wins.
+- **Consequence for the official configuration:** three counts do not rank configurations by themselves. The rule written before the dev results (`finqa/evals/autopilot.py`: lowest dev wrong rate, then within 3 points the highest accuracy) would pick 2B (dev: 5 correct, 1 wrong, 45 refused), because it has no coverage floor. 2B answers so few questions that it is close to a system that always abstains, which A2 calls useless. Choosing the official configuration therefore needs a coverage floor or a judgment, recorded here once decided.
 
 ## A7. Acceptable wrong-answer rate
 
