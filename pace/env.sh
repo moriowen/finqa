@@ -9,7 +9,7 @@ if [ -n "${SLURM_JOB_ID:-}" ] && [ -z "${HF_HOME:-}" ]; then
   export HF_HOME="$LOCAL/finqa-hf-$SLURM_JOB_ID"
 fi
 export HF_HOME="${HF_HOME:-$HOME/scratch/finqa-hf}"
-export HF_HUB_ENABLE_HF_TRANSFER=1
+export HF_XET_HIGH_PERFORMANCE=1
 export PYTHONUNBUFFERED=1 TOKENIZERS_PARALLELISM=false
 export FINQA_ROOT="$PROJECT_DIR"
 if command -v module >/dev/null 2>&1; then module load python/3.12.5 >/dev/null 2>&1 || true; fi
