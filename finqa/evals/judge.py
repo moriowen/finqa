@@ -115,6 +115,18 @@ def cmd_run(a):
         tasks.append(grade(cl, r["qid"], gd["question"], gd["answer"], gd["justification"], r.get("answer"), r["status"]))
     print(f"judge {a.run}: {len(tasks)} to grade", file=sys.stderr)
     asyncio.run(run_tasks(tasks, out, a.limit))
+    # A18: also grade every pre-verifier candidate, to measure verifier false rejects and false accepts
+    cout = run / "judge_cands.jsonl"
+    cdone = {r["key"] for r in read_jsonl(cout)}
+    ctasks = []
+    for r in read_jsonl(run / "pass1.jsonl"):
+        if r.get("status") != "CANDIDATE" or "__" in r["qid"] or r["key"] in cdone:
+            continue
+        gd = g[r["qid"]]
+        ctasks.append(grade(cl, r["key"], gd["question"], gd["answer"], gd["justification"], r.get("answer"), None))
+    if ctasks:
+        print(f"judge {a.run}: {len(ctasks)} pre-verifier candidates to grade", file=sys.stderr)
+        asyncio.run(run_tasks(ctasks, cout, a.limit))
 
 
 async def _const(key, label):
