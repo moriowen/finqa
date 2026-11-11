@@ -2,6 +2,8 @@
 
 A question answering system for the 150 FinanceBench questions. For each question it returns an answer, the PDF page it came from, and the quote and passage that support it. If it cannot find and check that evidence, it says so and gives no answer.
 
+To inspect answers and their evidence, open [`viewer/index.html`](viewer/index.html) in a browser after cloning (no server needed). For each question it shows the answer, the Python computation, every cited page with the quote highlighted in the page text and an image of the page, the verifier's checks, and, in a collapsed box, the judge label and the gold answer. Rebuild it with `python -m finqa.evals.viewer`.
+
 The short write-up is [`docs/report.md`](docs/report.md). This README holds the full results. Every answer with its provenance is in [`results/answers.md`](results/answers.md).
 
 ## Main result

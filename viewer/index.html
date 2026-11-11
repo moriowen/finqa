@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FinanceBench answer viewer</title>
+<style>
+  :root { --line:#ccc; --muted:#555; --hl:#fff3a8; }
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; margin: 0; color:#111; background:#fff; }
+  header { padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 18px; margin: 0 0 4px; }
+  header p { margin: 0 0 8px; color: var(--muted); }
+  .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  select, input { font: inherit; padding: 3px 5px; }
+  main { display:grid; grid-template-columns: 360px 1fr; height: calc(100vh - 120px); }
+  #list { overflow:auto; border-right:1px solid var(--line); }
+  #list div.item { padding:6px 10px; border-bottom:1px solid #eee; cursor:pointer; }
+  #list div.item:hover { background:#f5f5f5; }
+  #list div.item.sel { background:#e8eefb; }
+  #list .q { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #detail { overflow:auto; padding: 12px 20px 40px; }
+  .tag { display:inline-block; font-size:11px; padding:1px 5px; border:1px solid #999; border-radius:3px; margin-right:4px; }
+  .ANSWER { background:#e6f4ea; border-color:#3c8d5a; } .NOT_FOUND { background:#fdecea; border-color:#c0392b; }
+  .AMBIGUOUS { background:#fff6d6; border-color:#b8962e; } .BARE { background:#eee; }
+  .correct { color:#1e7b3a; } .incorrect { color:#c0392b; } .refusal { color:#666; }
+  h2 { font-size: 16px; margin: 0 0 6px; } h3 { font-size: 14px; margin: 18px 0 6px; border-bottom:1px solid #eee; }
+  .meta { color: var(--muted); margin-bottom: 8px; }
+  .answer { font-size: 15px; background:#fafafa; border:1px solid #eee; padding:8px 10px; }
+  code, pre { font-family: Menlo, Consolas, monospace; font-size: 12px; }
+  pre { background:#fafafa; border:1px solid #eee; padding:6px 8px; max-height: 260px; overflow:auto; white-space:pre-wrap; }
+  pre mark { background: var(--hl); }
+  .ev { border:1px solid var(--line); padding:8px 10px; margin-bottom:10px; }
+  .ev .row { display:grid; grid-template-columns: 1fr 260px; gap: 12px; }
+  .ev img { width: 100%; border:1px solid var(--line); cursor: zoom-in; }
+  details { margin-top: 6px; } summary { cursor:pointer; color:#234; }
+  table { border-collapse: collapse; } td { padding: 2px 8px 2px 0; vertical-align: top; }
+  #overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; align-items:flex-start; justify-content:center; overflow:auto; z-index:9; }
+  #overlay img { max-width: 900px; width: 95%; margin: 20px 0; background:#fff; }
+  #flow { display:none; padding: 10px 16px; border-bottom:1px solid var(--line); }
+  #flow img { max-width: 760px; width: 100%; }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; height:auto; } #list { max-height: 40vh; } .ev .row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>FinanceBench answer viewer</h1>
+  <p>Every question, the system's answer, and the evidence it cites: filing, PDF page, quote, the page text it read, and an image of the page. Pick a question on the left.
+     <a href="#" id="flowlink">How the system works</a> · <a href="../README.md">README</a></p>
+  <div class="controls">
+    <label>Run <select id="run"></select></label>
+    <label>Status <select id="status"><option value="">all</option><option>ANSWER</option><option>NOT_FOUND</option><option>AMBIGUOUS</option><option>BARE</option></select></label>
+    <label>Judge <select id="judge"><option value="">all</option><option>correct</option><option>incorrect</option><option>refusal</option></select></label>
+    <label>Split <select id="split"><option value="">all</option><option>dev</option><option>test</option></select></label>
+    <input id="search" placeholder="search question or company" size="28">
+    <span id="count"></span>
+  </div>
+</header>
+<div id="flow"><img src="../docs/diagrams/system-flow.svg" alt="System flow diagram"></div>
+<main>
+  <div id="list"></div>
+  <div id="detail"><p>Pick a question.</p></div>
+</main>
+<div id="overlay"><img alt=""></div>
+<script src="data.js"></script>
+<script>
+const D = window.DATA, Q = Object.fromEntries(D.questions.map(q => [q.qid, q]));
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm = s => String(s ?? "").replace(/[\s|]+/g, "").toLowerCase();
+let sel = null;
+
+D.runs.forEach((r, i) => $("run").add(new Option(r.label, i)));
+["run","status","judge","split"].forEach(id => $(id).onchange = render);
+$("search").oninput = render;
+$("flowlink").onclick = e => { e.preventDefault(); const f = $("flow"); f.style.display = f.style.display === "block" ? "none" : "block"; };
+$("overlay").onclick = () => $("overlay").style.display = "none";
+
+function run() { return D.runs[$("run").value]; }
+
+function render() {
+  const R = run(), st = $("status").value, jd = $("judge").value, sp = $("split").value, s = $("search").value.toLowerCase();
+  const items = D.questions.filter(q => {
+    const r = R.rows[q.qid]; if (!r) return false;
+    return (!st || r.status === st) && (!jd || r.judge === jd) && (!sp || q.split === sp) &&
+      (!s || (q.question + " " + q.doc).toLowerCase().includes(s));
+  });
+  $("count").textContent = items.length + " of " + D.questions.length + " questions";
+  $("list").innerHTML = items.map((q, i) => {
+    const r = R.rows[q.qid];
+    return `<div class="item ${q.qid === sel ? "sel" : ""}" data-q="${q.qid}">
+      <span class="tag ${r.status}">${r.status}</span><span class="${r.judge}">${r.judge ?? ""}</span>
+      <span class="q">${esc(q.question)}</span><small>${esc(q.doc)}</small></div>`;
+  }).join("");
+  $("list").querySelectorAll(".item").forEach(el => el.onclick = () => { sel = el.dataset.q; render(); show(); });
+  if (sel) show();
+}
+
+function passage(p) {
+  const qn = norm(p.quote);
+  return (p.passage || "").split("\n").map(l => {
+    const ln = norm(l);
+    return ln && (qn.includes(ln) && ln.length > 6 || ln.includes(qn)) ? `<mark>${esc(l)}</mark>` : esc(l);
+  }).join("\n");
+}
+
+function evidence(ps) {
+  return ps.map(p => `<div class="ev"><div class="row"><div>
+      <b>${esc(p.id ?? "")}</b> · <code>${esc(p.doc)}</code> · PDF page <b>${p.page}</b>
+      ${p.column ? " · column " + esc(p.column) : ""}${p.scale ? " · " + esc(p.scale) : ""}
+      <div>Quote: <code>${esc(p.quote)}</code></div>
+      <details open><summary>Page text the model read (quote highlighted)</summary><pre>${passage(p)}</pre></details>
+    </div><div><img src="${p.img}" alt="page ${p.page}" loading="lazy" onclick="zoom('${p.img}')"><small>Click to enlarge</small></div></div></div>`).join("");
+}
+
+function zoom(src) { const o = $("overlay"); o.querySelector("img").src = src; o.style.display = "flex"; }
+
+function show() {
+  const q = Q[sel], r = run().rows[sel]; if (!q || !r) return;
+  let h = `<h2>${esc(q.question)}</h2>
+    <div class="meta">${esc(q.qid)} · filing in the dataset <code>${esc(q.doc)}</code> · ${esc(q.type)} · ${q.split} split</div>
+    <span class="tag ${r.status}">${r.status}</span>`;
+  if (r.answer) h += `<h3>Answer</h3><div class="answer">${esc(r.answer)}</div>`;
+  if (r.computation) h += `<h3>Computation (done by Python, not the model)</h3><code>${esc(r.computation)}</code>`;
+  if (r.status === "BARE") h += `<p class="meta">Bare run: one prompt, no checks, no extracted evidence. Shown for comparison only.</p>`;
+  if (r.provenance.length) h += `<h3>Provenance (attached by code from checked values)</h3>` + evidence(r.provenance);
+  if (r.reason && r.status !== "ANSWER") h += `<h3>Why the system did not answer</h3><p>${esc(r.reason)}</p>`;
+  else if (r.reason) h += `<p class="meta">${esc(r.reason)}</p>`;
+  (r.alternatives || []).forEach(a => h += `<h3>Candidate answer from <code>${esc(a.doc)}</code></h3><div class="answer">${esc(a.answer)}</div>` + evidence(a.provenance));
+  if (r.verifier) {
+    const v = r.verifier;
+    h += `<h3>Verifier (${esc(r.models?.verifier)}, sees page images)</h3><table>
+      <tr><td>Decision</td><td><b>${v.pass ? "accepted" : "rejected"}</b></td></tr>
+      <tr><td>Period correct</td><td>${v.period_ok}</td></tr><tr><td>Unit correct</td><td>${v.unit_ok}</td></tr>
+      <tr><td>Value in the right column</td><td>${v.value_in_correct_column}</td></tr><tr><td>Answer supported</td><td>${esc(v.answer_supported)}</td></tr>
+      ${v.problem ? `<tr><td>Problem noted</td><td>${esc(v.problem)}</td></tr>` : ""}</table>`;
+  }
+  if (r.candidates && r.candidates.length > 1 || run().id.startsWith("pathb")) h += `<h3>Router (Path B): candidate filings</h3><p>${(r.candidates || []).map(c => "<code>" + esc(c) + "</code>").join(", ") || "none"}</p>`;
+  if (r.searched) h += `<h3>Pages searched</h3><p>${r.searched.map(s => `<code>${esc(s.doc)}</code>: ${s.pages.join(", ")}`).join("<br>")}</p>`;
+  h += `<h3>Models</h3><p>Answer: <code>${esc(r.models?.answer)}</code> · Verifier: <code>${esc(r.models?.verifier ?? "none")}</code></p>`;
+  const cited = r.provenance.map(p => p.page), hit = r.provenance.some(p => p.doc === q.doc && q.gold_pages.includes(p.page));
+  h += `<details><summary>Evaluation only (the system never sees this): judge label, gold answer, gold pages</summary>
+    <table><tr><td>Judge label</td><td class="${r.judge}"><b>${r.judge ?? "n/a"}</b></td></tr>
+    <tr><td>Gold answer</td><td>${esc(q.gold_answer)}</td></tr>
+    <tr><td>Gold justification</td><td>${esc(q.gold_justification)}</td></tr>
+    <tr><td>Gold evidence pages</td><td>${q.gold_pages.join(", ")} ${cited.length ? (hit ? "· a cited page is a gold page" : "· no cited page is a gold page") : ""}</td></tr></table></details>`;
+  $("detail").innerHTML = h;
+  $("detail").scrollTop = 0;
+}
+render();
+</script>
+</body>
+</html>
