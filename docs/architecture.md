@@ -104,7 +104,7 @@ CODE CHECK                                                             A18
   fail → retry call 2 once, then NOT_FOUND
   │
   ▼
-VERIFIER (fixed Qwen3.5-27B, with page images)                         A18
+VERIFIER (Gemma 4 12B, other family, with page images)                A18, A23
   G6 + G7: period_ok, unit_ok, value_in_correct_column, answer_supported
   anything except a clear "yes" → NOT_FOUND
   │

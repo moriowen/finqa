@@ -146,7 +146,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
   <figure>
     <h2>2 · Answering one question</h2>
     <div class="scroll">
-    <svg class="dia" viewBox="0 0 1140 1652" role="img" aria-label="A question goes through the router to up to three candidate filings. Each filing runs its own pipeline: retrieval, call 1 extracts values and a formula, code checks quotes and the formula, Python computes, call 2 writes the answer, code checks the numbers, a fixed 27B verifier checks against page images. Any failure leads to NOT_FOUND for that filing. G8 combines the filings. Code attaches the provenance to an answer. Abstentions produce a row with the reason and never the failed value.">
+    <svg class="dia" viewBox="0 0 1140 1652" role="img" aria-label="A question goes through the router to up to three candidate filings. Each filing runs its own pipeline: retrieval, call 1 extracts values and a formula, code checks quotes and the formula, Python computes, call 2 writes the answer, code checks the numbers, a fixed verifier checks against page images. Any failure leads to NOT_FOUND for that filing. G8 combines the filings. Code attaches the provenance to an answer. Abstentions produce a row with the reason and never the failed value.">
       <defs>
         <filter id="rg2" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>
         <marker id="ak2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="mk" d="M0,0 L10,5 L0,10 z"/></marker>
@@ -251,7 +251,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
       <text class="s" x="430" y="580" text-anchor="middle">+ filing metadata (company, type, period)</text>
       <text class="t" x="430" y="642" text-anchor="middle">CALL 1 · EXTRACT</text>
       <text class="s" x="430" y="662" text-anchor="middle">values + formula → JSON, schema enforced (G1, G2)</text>
-      <text class="s m" x="430" y="681" text-anchor="middle">model under test: Qwen3.5 2B / 9B / 27B</text>
+      <text class="s m" x="430" y="681" text-anchor="middle">model under test: Qwen3.5 2B / 9B (27B: future scope)</text>
       <text class="t" x="430" y="743" text-anchor="middle">CODE CHECKS</text>
       <text class="s" x="430" y="764" text-anchor="middle">G3 quote is on the page · G5 names-only formula</text>
       <text class="s" x="668" y="694">retry once</text>
@@ -268,7 +268,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
       <text class="s" x="668" y="975">with error</text>
       <text class="s r" x="674" y="1052" text-anchor="middle">fails again</text>
       <text class="s m" x="442" y="1062">pass</text>
-      <text class="t" x="430" y="1097" text-anchor="middle">VERIFIER · fixed Qwen3.5-27B + page images</text>
+      <text class="t" x="430" y="1097" text-anchor="middle">VERIFIER · Gemma 4 12B + page images</text>
       <text class="s" x="430" y="1118" text-anchor="middle">G6 period, unit, column · G7 answer supported?</text>
       <text class="s m" x="430" y="1137" text-anchor="middle">same verifier for every model size</text>
       <text class="s r" x="674" y="1132" text-anchor="middle">not a clear yes</text>
@@ -334,7 +334,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
       <text class="s m" x="840" y="50" text-anchor="middle">gold pages + full harness</text>
       <text class="t" x="180" y="97" text-anchor="end">Qwen3.5-2B</text>
       <text class="t" x="180" y="161" text-anchor="end">Qwen3.5-9B</text>
-      <text class="t" x="180" y="225" text-anchor="end">Qwen3.5-27B</text>
+      <text class="t" x="180" y="225" text-anchor="end">Qwen3.5-27B (dev only)</text>
       <text class="s" x="320" y="97" text-anchor="middle">1 job · 150 questions</text>
       <text class="s" x="320" y="161" text-anchor="middle">1 job · 150 questions</text>
       <text class="s" x="320" y="225" text-anchor="middle">1 job · 150 questions</text>
@@ -348,7 +348,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
       <text class="s" x="1055" y="116" text-anchor="middle">retrieval</text>
       <text class="s" x="1055" y="136" text-anchor="middle">prompts</text>
       <text class="s" x="1055" y="156" text-anchor="middle">temperature 0</text>
-      <text class="s" x="1055" y="176" text-anchor="middle">verifier: 27B</text>
+      <text class="s" x="1055" y="176" text-anchor="middle">verifier: Gemma 4 12B</text>
       <text class="s" x="1055" y="196" text-anchor="middle">planner: 27B</text>
       <text class="s" x="1055" y="216" text-anchor="middle">same pages</text>
       <text class="s" x="450" y="320" text-anchor="middle">FULL − BARE = what the harness adds</text>
