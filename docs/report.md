@@ -1,76 +1,52 @@
-# FinanceBench QA with provenance: write-up
+---
+title: "Financial Document QA on FinanceBench"
+---
 
-Code, full results and all 150 answers with provenance: **https://github.com/moriowen/finqa** (README, and `results/answers.md`).
+Code, full results and all 150 answers with provenance: github.com/moriowen/finqa (README and results/answers.md).
 
-## Goal
+I set one rule before designing anything: a wrong answer is worse than no answer. If the system cannot point to evidence that it has checked, it returns NOT_FOUND and gives the reason. Results are reported as correct, wrong and refused, and the main number is the wrong-answer rate.
 
-The system answers questions about SEC filings and returns the PDF page, the quote and the passage behind each answer. I set one priority before the design work: a wrong answer is worse than no answer. If the system cannot point to checked evidence, it returns NOT_FOUND with the reason. I measure success by the **wrong-answer rate** first and coverage second.
+## 1. System design
 
-## System design
+**Parsing.** PyMuPDF reads each of the 363 filings page by page and stores every page twice: plain text for search, and layout text that keeps table rows and columns (joined with "|") for the model to read. The page index becomes the PDF page number in the provenance. At index time, the code marks the pages whose title is a primary statement (income statement, balance sheet, cash flow statement). I call these the statement pack. When I looked at the gold evidence, most answers were on those pages.
 
-The design separates what the model is good at (reading a page, choosing values) from what code does reliably (finding text, arithmetic, attaching citations).
+**Retrieval.** For the filing named in the question, the model sees the statement pack, the top BM25 pages and the top pages by embedding similarity (Qwen3-Embedding-8B), at most 12 pages. This finds a gold page for 87% of the dev questions. I compared four retrieval options on the dev questions, with a selection rule written down before the results.
 
-1. **Parsing.** PyMuPDF stores each page twice: plain text for search, and layout text that keeps table rows and columns for the model to read. Pages whose title is a primary statement (income statement, balance sheet, cash flows) form a per-filing **statement pack**. Data analysis of the gold evidence showed that most answers sit on those pages.
-2. **Retrieval.** Statement pack + BM25 + dense embeddings (Qwen3-Embedding-8B) over the given filing, at most 12 pages. On the dev set this reaches 87% gold-page recall. I compared four retrieval options on dev with a decision rule written before the results.
-3. **Extraction (LLM call 1).** JSON enforced by the server: each value with its page, exact quote, column, period and scale, and a formula over value names.
-4. **Code checks.** The quote must be on the page and contain the value. The formula may use only value names and a few functions. **Python does the arithmetic.**
-5. **Answer (LLM call 2).** Plain text that cites `[v1]`. Every number in it must be a checked value or the computed result.
-6. **Verifier.** A model from another family (Gemma 4 12B) sees images of the cited pages and must confirm period, unit, column and support.
-7. **Output.** Code attaches the provenance from the checked values. The model never writes a page number. Each row also names the answering model and the verifier.
+**Generation.** The answer takes two LLM calls with code checks around them.
 
-Any failed check gets one retry with the error message, then NOT_FOUND. A second path, for questions with no filing named, routes to up to 3 candidate filings and returns AMBIGUOUS if they disagree.
+1. The model returns JSON (the schema is enforced by vLLM). It lists each value it needs, with the page, the exact quote, the column, the period and the unit, plus a formula over the value names.
+2. Code checks that each quote is on its page and contains the value, and that the formula uses only value names and a few functions. Python then does the arithmetic.
+3. A second call writes the answer text and cites values as [v1]. Code checks that every number in the text is a checked value or the computed result.
+4. A verifier model from another family (Gemma 4 12B) looks at images of the cited pages and confirms the period, unit, column and support.
+5. Code attaches the provenance (filing, page, quote, passage) from the checked values. The LLM never writes a page number.
 
-Every decision is recorded with its evidence and "what changes if this is wrong" in `docs/assumptions.md` (23 entries).
+A failed check gets one retry with the error message, then NOT_FOUND. When the question names no filing, a router picks up to three candidate filings, each runs the same pipeline, and disagreement returns AMBIGUOUS.
 
-## Evaluation
+Models: Qwen3.5 at 2B, 9B and 27B (27B in FP8), served with vLLM on Georgia Tech's ICE cluster. I tuned on 51 dev questions and ran the other 99 once at the end. Text answers were graded by gpt-oss-20b, which agreed with the FinanceBench paper's 2,400 human labels 76% of the time. Numeric answers were graded by code.
 
-- 51 dev questions for all tuning; 99 test questions run once with the frozen system.
-- Numeric answers are graded by code. The others are graded by an LLM judge (gpt-oss-20b), which I first calibrated on the paper's 2,400 human-labeled answers (76% agreement; it calls a wrong answer correct 5% of the time).
-- 290 extra questions with no answer in the filing (wrong filing, or year shifted) test whether the system refuses.
-- To separate the model from the harness, each Qwen3.5 size ran three ways: **bare** (same pages, one prompt), **full** harness, and **oracle** (gold pages).
+## 2. Answers with provenance
 
-## Results (150 questions)
+The official configuration is Qwen3.5-9B with the full pipeline, chosen on the dev questions because it had the fewest wrong answers. Every answer and refusal, with page, quote and passage, is in results/answers.md. Totals over the 150 questions:
 
 | Setup | Correct | Wrong | Refused | Wrong-answer rate |
 |---|---|---|---|---|
-| Qwen3.5-9B bare | 91 | 59 | 0 | 39% |
-| **Qwen3.5-9B full harness (official)** | **71** | **17** | **62** | **11%** |
-| Qwen3.5-9B full, gold pages | 71 | 19 | 60 | 13% |
-| Qwen3.5-2B bare | 73 | 76 | 1 | 51% |
-| Qwen3.5-2B full harness | 12 | 2 | 136 | 1% |
-| Qwen3.5-27B (FP8) bare | 100 | 49 | 1 | 33% |
-| Qwen3.5-27B (FP8) full harness | 76 | 24 | 50 | 16% |
-| Qwen3.5-27B (FP8) full, no filing given | 72 | 20 | 58 | 13% |
+| 9B, same pages, one prompt, no checks | 91 | 59 | 0 | 39% |
+| **9B, full pipeline (official)** | **71** | **17** | **62** | **11%** |
+| 27B (FP8), full pipeline | 76 | 24 | 50 | 16% |
+| 27B (FP8), full pipeline, no filing named | 72 | 20 | 58 | 13% |
 | GPT-4 Turbo, paper, single store (human labels) | 75 | 17 | 58 | 11% |
-| GPT-4 Turbo, paper, shared store, no filing given | 29 | 20 | 101 | 13% |
+| GPT-4 Turbo, paper, shared store, no filing named | 29 | 20 | 101 | 13% |
 
-- **Official setup: 9B full**, chosen on dev by the lowest wrong-answer rate (5 wrong against 10 for 27B, same 26 correct).
-- **Unanswerable questions:** 9B full gave 1 false answer out of 290 (bare: 20). 2B full gave 0 (bare: 53). 27B full gave 12, but 10 of those answers say that the filing is about another company, so they are refusals with the wrong status.
-- **Provenance:** every 9B answer cites the right filing, and 84% cite a gold evidence page.
-- **Held-out test only:** 9B full is 12% wrong, close to the full-set 11%, so tuning on dev did not overfit.
+Every 9B answer cites the right filing, and 84% cite a page that the dataset marks as evidence. Three rows from the answer file:
 
-## What worked
+- *Which of JPM's segments had the highest net income in 2022 Q2?* Corporate & Investment Bank, $3,725 million. Computed as max over four segment values. Evidence: JPMORGAN_2022Q2_10Q, page 27, "Net income | $3,725", plus pages 22 and 33 for the other segments.
+- *Does American Water Works have positive working capital in FY2022?* No: $1,250 million current assets minus $2,811 million current liabilities is -$1,561 million. Evidence: AMERICANWATERWORKS_2022_10K, page 81 "Total current assets | 1,250" and page 82 "Total current liabilities | 2,811".
+- *Is Verizon's liquidity healthy based on its quick ratio for FY2022?* NOT_FOUND. Reason: the extractor found the inputs on page 56 but could not tell which items the quick ratio should include.
 
-- **The harness, more than the model size.** It cut 9B wrong answers by 71% (59 to 17). A local 9B model reaches the same wrong-answer rate and coverage as GPT-4 Turbo in the paper's comparable setup. The judges differ, so this comparison is approximate.
-- **Code for arithmetic and citations.** No answer can cite a quote that is not on its page.
-- **Refusals.** The checks almost never let an answer through when the filing has none.
-- **Routing without a filing.** With no filing named, 27B lost only 4 correct answers against the same model with the filing given, and got 72 correct against 29 for GPT-4 Turbo in the paper's matching setup.
+## 3. What worked, what didn't, and what I'd change
 
-## What did not work
+**What worked.** The checks did more than model size. For 9B they cut wrong answers from 59 to 17, and a local 9B model ended up level with GPT-4 Turbo in the paper's comparable setup (the graders differ, so this is approximate). On 290 questions paired with a filing that holds no answer, the 9B pipeline answered once, and without the checks it answered 20 times. Without a named filing, 27B got 72 right against GPT-4 Turbo's 29. Letting code do the arithmetic and attach the citations meant no answer could cite text that is not on its page.
 
-- **A bigger model did not mean fewer wrong answers.** 27B is better bare (33% wrong against 39%), but with the harness it answers more and is wrong more often (16% against 11%).
-- **Retrieval was not the limit for 9B.** Gold pages give the same 71 correct. The losses happen after retrieval: 35 questions fail a code check twice, and 18 more find no evidence. 27B does gain from gold pages (+13 correct), so retrieval matters more as the reader gets stronger.
-- **Definitions cause most of the remaining wrong answers.** Examples: working capital from total instead of operating items, a different quick ratio, capex/revenue instead of assets/revenue. The numbers are real and correctly cited, so neither the code checks nor the verifier catch them. A glossary of definitions in the prompt did not help (coverage 59% to 52%, same wrong count).
-- **The verifier is weak.** It caught 8 of 26 wrong 9B answers and 4 of 26 wrong 27B answers that passed the code checks.
-- **2B is too small for strict checks.** Its answers are almost always right, but it answers only 9% of questions.
+**What didn't.** A bigger model did not lower the wrong-answer rate. 27B is better without checks (33% wrong against 39%) but with them it answers more and is wrong more often (16% against 11%). The verifier is the weak part: it caught 8 of 26 wrong 9B answers and 4 of 26 wrong 27B answers. Most remaining errors are definition choices, such as working capital from total instead of operating items, or a different quick ratio. The numbers are real and correctly cited, so no check catches them. A glossary of definitions in the prompt made things worse. For 9B, retrieval was not the limit: with the gold pages it still got 71 right. 2B passes the checks on only 9% of questions.
 
-## What I would change
-
-1. **Show the definition.** When a metric has several common definitions, state the one used or ask the user. This targets the largest group of remaining errors.
-2. **Verify the formula against the question,** not only the values against the page.
-3. **Recover check failures** with a further retry or a larger model only on retry.
-4. **Treat "this filing is about another company" as NOT_FOUND** with a code check against the filing metadata.
-
-## Limitations and future scope
-
-The work ran on a student GPU allocation. The 80 GB GPUs stayed in the queue for more than a day, so the final runs used 47 GB GPU partitions: 27B in FP8 instead of bf16, Gemma 4 12B instead of a 27B verifier, and gpt-oss-20b instead of the 120b judge. All runs use one seed. With more compute, I would run 27B in bf16 and larger answering models, a stronger verifier with reasoning, the larger judge, Path B for every model size, and several seeds. The pipeline needs no change for any of these: each model is one setting in the job script.
+**With more time.** First, show the definition the system used, or ask the user, when a metric has more than one common definition. Second, have the verifier check the formula against the question, not only the values against the page. Third, recover some of the 35 questions that fail a code check twice, with a further retry or a larger model only on retry. The compute limit also shaped the runs: 80 GB GPUs were not available, so 27B ran in FP8, the verifier was a 12B model and the judge a 20B model, all with one seed. With more compute I would rerun at full precision with a larger verifier and judge, and several seeds.
