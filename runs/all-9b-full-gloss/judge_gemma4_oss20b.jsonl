@@ -1,0 +1,150 @@
+{"key": "financebench_id_00591", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02024", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01091", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04735", "label": "correct", "by": "code"}
+{"key": "financebench_id_00601", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02049", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01107", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04784", "label": "correct", "by": "code"}
+{"key": "financebench_id_00603", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01148", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00605", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02416", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04980", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00606", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02419", "label": "refusal", "by": "status"}
+{"key": "financebench_id_05718", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02608", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01226", "label": "refusal", "by": "status"}
+{"key": "financebench_id_05915", "label": "correct", "by": "code"}
+{"key": "financebench_id_00669", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02981", "label": "refusal", "by": "status"}
+{"key": "financebench_id_06247", "label": "correct", "by": "code"}
+{"key": "financebench_id_00678", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02987", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01254", "label": "refusal", "by": "status"}
+{"key": "financebench_id_06272", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03029", "label": "correct", "by": "code"}
+{"key": "financebench_id_06655", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00685", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03031", "label": "correct", "by": "code"}
+{"key": "financebench_id_01279", "label": "refusal", "by": "status"}
+{"key": "financebench_id_06741", "label": "correct", "by": "code"}
+{"key": "financebench_id_03069", "label": "correct", "by": "code"}
+{"key": "financebench_id_00206", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01290", "label": "refusal", "by": "status"}
+{"key": "financebench_id_07507", "label": "correct", "by": "code"}
+{"key": "financebench_id_03282", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01319", "label": "refusal", "by": "status"}
+{"key": "financebench_id_07661", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03471", "label": "correct", "by": "code"}
+{"key": "financebench_id_01328", "label": "refusal", "by": "status"}
+{"key": "financebench_id_07966", "label": "correct", "by": "code"}
+{"key": "financebench_id_03473", "label": "correct", "by": "code"}
+{"key": "financebench_id_00222", "label": "refusal", "by": "status"}
+{"key": "financebench_id_08135", "label": "correct", "by": "code"}
+{"key": "financebench_id_00723", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03531", "label": "correct", "by": "code"}
+{"key": "financebench_id_00283", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01351", "label": "refusal", "by": "status"}
+{"key": "financebench_id_08286", "label": "correct", "by": "code"}
+{"key": "financebench_id_00724", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03620", "label": "correct", "by": "code"}
+{"key": "financebench_id_00288", "label": "refusal", "by": "status"}
+{"key": "financebench_id_09724", "label": "correct", "by": "code"}
+{"key": "financebench_id_00735", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03718", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00299", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01476", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10130", "label": "correct", "by": "code"}
+{"key": "financebench_id_03838", "label": "correct", "by": "code"}
+{"key": "financebench_id_00302", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10136", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00757", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03849", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01484", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10285", "label": "correct", "by": "code"}
+{"key": "financebench_id_03856", "label": "correct", "by": "code"}
+{"key": "financebench_id_10420", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00799", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10499", "label": "correct", "by": "code"}
+{"key": "financebench_id_04080", "label": "correct", "by": "code"}
+{"key": "financebench_id_02119", "label": "incorrect", "by": "llm", "reason": "The answer provides a different per-share amount ($82.31) than the gold answer ($66.56).", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer provides a different per-share amount ($82.31) than the gold answer ($66.56).\"}"}
+{"key": "financebench_id_04103", "label": "correct", "by": "code"}
+{"key": "financebench_id_00790", "label": "incorrect", "by": "llm", "reason": "The answer contradicts the gold answer by stating CVS is not capital-intensive, whereas the gold answer asserts it is capital-intensive based on ROA and asset ratios.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer contradicts the gold answer by stating CVS is not capital-intensive, whereas the gold answer asserts it is capital-intensive based on ROA and asset ratios.\"}"}
+{"key": "financebench_id_00705", "label": "correct", "by": "llm", "reason": "The answer states the same $400,000,000 increase and provides the correct calculation.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer states the same $400,000,000 increase and provides the correct calculation.\"}"}
+{"key": "financebench_id_00005", "label": "incorrect", "by": "llm", "reason": "The answer gives a different working capital figure ($2,278\u202fmillion) than the gold answer ($831\u202fmillion).", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer gives a different working capital figure ($2,278\u202fmillion) than the gold answer ($831\u202fmillion).\"}"}
+{"key": "financebench_id_04171", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00464", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00216", "label": "incorrect", "by": "llm", "reason": "The answer contradicts the gold answer by claiming Verizon has a healthy liquidity profile, whereas the gold answer states the quick ratio of ~0.54 indicates it does not.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer contradicts the gold answer by claiming Verizon has a healthy liquidity profile, whereas the gold answer states the quick ratio of ~0.54 indicates it does not.\"}"}
+{"key": "financebench_id_01244", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer\u2019s key fact: CVS paid a $0.55 dividend per share in Q2 of FY2022.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer matches the gold answer\u2019s key fact: CVS paid a $0.55 dividend per share in Q2 of FY2022.\"}"}
+{"key": "financebench_id_04209", "label": "correct", "by": "code"}
+{"key": "financebench_id_00476", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03882", "label": "correct", "by": "llm", "reason": "The answer states $1,615.9 million, which matches the gold answer of $1,616.00 within acceptable rounding precision.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer states $1,615.9 million, which matches the gold answer of $1,616.00 within acceptable rounding precision.\"}"}
+{"key": "financebench_id_00394", "label": "correct", "by": "llm", "reason": "The answer correctly identifies Corporate & Investment Bank as the segment with the highest net income and gives the exact figure of $3,725 million, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies Corporate & Investment Bank as the segment with the highest net income and gives the exact figure of $3,725 million, matching the gold answer.\"}"}
+{"key": "financebench_id_01163", "label": "correct", "by": "llm", "reason": "The answer correctly states that cash flow from operations was the highest for Nike in FY2023, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that cash flow from operations was the highest for Nike in FY2023, matching the gold answer.\"}"}
+{"key": "financebench_id_04254", "label": "correct", "by": "code"}
+{"key": "financebench_id_00494", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00917", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04302", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00070", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer\u2019s conclusion and figure for negative working capital of $1,561\u202fmillion.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer matches the gold answer\u2019s conclusion and figure for negative working capital of $1,561\u202fmillion.\"}"}
+{"key": "financebench_id_01911", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00941", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04412", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00517", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01912", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00956", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04417", "label": "correct", "by": "code"}
+{"key": "financebench_id_00521", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01928", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01488", "label": "correct", "by": "llm", "reason": "The answer correctly identifies the Consumer Health business segment as the discontinued operation from August 30, 2023 onward, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies the Consumer Health business segment as the discontinued operation from August 30, 2023 onward, matching the gold answer.\"}"}
+{"key": "financebench_id_04458", "label": "correct", "by": "code"}
+{"key": "financebench_id_00540", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01930", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01482", "label": "correct", "by": "llm", "reason": "The answer states the proposal was defeated, matching the gold answer, and provides additional vote counts that do not contradict the key fact.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer states the proposal was defeated, matching the gold answer, and provides additional vote counts that do not contradict the key fact.\"}"}
+{"key": "financebench_id_04481", "label": "correct", "by": "code"}
+{"key": "financebench_id_00552", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01935", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01028", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04660", "label": "correct", "by": "code"}
+{"key": "financebench_id_01490", "label": "correct", "by": "llm", "reason": "The answer states the same approximate $20\u202fbillion gain as the gold answer and adds no contradictory information.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer states the same approximate $20\u202fbillion gain as the gold answer and adds no contradictory information.\"}"}
+{"key": "financebench_id_01346", "label": "incorrect", "by": "llm", "reason": "The answer gives different tax rates (20.2% to 22.9%) and a different change (2.7 percentage points) than the gold answer (20% to 23%).", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer gives different tax rates (20.2% to 22.9%) and a different change (2.7 percentage points) than the gold answer (20% to 23%).\"}"}
+{"key": "financebench_id_01077", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04672", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00807", "label": "incorrect", "by": "llm", "reason": "The answer contradicts the gold answer by claiming 3M\u2019s quick ratio is 0.8468 and that this indicates a healthy liquidity profile, whereas the gold answer states the ratio was 0.96 and that it falls short of the 1x mark, concluding the liquidity is not reasonably healthy.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer contradicts the gold answer by claiming 3M\u2019s quick ratio is 0.8468 and that this indicates a healthy liquidity profile, whereas the gold answer states the ratio was 0.96 and that it falls short of the 1x mark, concluding the liquidity is not reasonably healthy.\"}"}
+{"key": "financebench_id_00407", "label": "correct", "by": "llm", "reason": "The answer correctly identifies corporate bonds as the largest short\u2011term investment for MGM in H1 FY2023, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies corporate bonds as the largest short\u2011term investment for MGM in H1 FY2023, matching the gold answer.\"}"}
+{"key": "financebench_id_01964", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01079", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04700", "label": "correct", "by": "code"}
+{"key": "financebench_id_01981", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01275", "label": "correct", "by": "llm", "reason": "The answer correctly states that operating activities generated the most cash flow for Best Buy in FY2023, matching the gold answer\u2019s figure of $1.8\u202fbn.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that operating activities generated the most cash flow for Best Buy in FY2023, matching the gold answer\u2019s figure of $1.8\u202fbn.\"}"}
+{"key": "financebench_id_00720", "label": "correct", "by": "llm", "reason": "The answer correctly states that gross margin is not a meaningful metric for American Express, aligning with the gold answer that performance is measured through Net Interest Margin and that gross margin is not applicable.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that gross margin is not a meaningful metric for American Express, aligning with the gold answer that performance is measured through Net Interest Margin and that gross margin is not applicable.\"}"}
+{"key": "financebench_id_00702", "label": "correct", "by": "llm", "reason": "The answer correctly identifies the gain on completion of the Consumer Healthcare JV transaction as the event that substantially increased net income in 2019, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies the gain on completion of the Consumer Healthcare JV transaction as the event that substantially increased net income in 2019, matching the gold answer.\"}"}
+{"key": "financebench_id_00382", "label": "correct", "by": "llm", "reason": "The answer correctly identifies Las Vegas resorts as the highest EBITDAR contributor and provides the matching figure of $3,142,308, consistent with the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies Las Vegas resorts as the highest EBITDAR contributor and provides the matching figure of $3,142,308, consistent with the gold answer.\"}"}
+{"key": "financebench_id_00563", "label": "correct", "by": "llm", "reason": "The answer correctly identifies the Data Center segment as having the highest proportional sales increase and provides the matching percentage.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies the Data Center segment as having the highest proportional sales increase and provides the matching percentage.\"}"}
+{"key": "financebench_id_00822", "label": "correct", "by": "llm", "reason": "The answer correctly identifies Richard A. Johnson as the nominee with substantially more votes against him, matching the gold answer\u2019s key fact and numbers.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies Richard A. Johnson as the nominee with substantially more votes against him, matching the gold answer\u2019s key fact and numbers.\"}"}
+{"key": "financebench_id_01491", "label": "correct", "by": "llm", "reason": "The answer states the same amount of $13.2\u202fbillion in cash proceeds, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer states the same amount of $13.2\u202fbillion in cash proceeds, matching the gold answer.\"}"}
+{"key": "financebench_id_00859", "label": "correct", "by": "llm", "reason": "The answer correctly identifies cross currency swaps as having the highest notional value of $32,502 million in FY\u202f2021, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies cross currency swaps as having the highest notional value of $32,502 million in FY\u202f2021, matching the gold answer.\"}"}
+{"key": "financebench_id_01198", "label": "incorrect", "by": "llm", "reason": "The answer gives a revenue increase figure but does not mention the specific drivers (EPYC, semi\u2011custom, Xilinx) identified in the gold answer.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer gives a revenue increase figure but does not mention the specific drivers (EPYC, semi\u2011custom, Xilinx) identified in the gold answer.\"}"}
+{"key": "financebench_id_00839", "label": "incorrect", "by": "llm", "reason": "The answer contradicts the gold answer by stating she does not have similar CEO experience, whereas the gold answer affirms she did.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer contradicts the gold answer by stating she does not have similar CEO experience, whereas the gold answer affirms she did.\"}"}
+{"key": "financebench_id_01487", "label": "correct", "by": "llm", "reason": "The answer correctly states that net earnings as a percent of sales increased and provides an increase (~0.107%) that aligns with the gold answer\u2019s 20% to 20.1% change.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that net earnings as a percent of sales increased and provides an increase (~0.107%) that aligns with the gold answer\u2019s 20% to 20.1% change.\"}"}
+{"key": "financebench_id_00711", "label": "correct", "by": "llm", "reason": "The answer provides the same inventory turnover ratio (\u22482.7) as the gold answer and correctly calculates it.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer provides the same inventory turnover ratio (\u22482.7) as the gold answer and correctly calculates it.\"}"}
+{"key": "financebench_id_00882", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer\u2019s total amount of $8,400,000,000 and correctly identifies the two $4,200,000,000 agreements.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer matches the gold answer\u2019s total amount of $8,400,000,000 and correctly identifies the two $4,200,000,000 agreements.\"}"}
+{"key": "financebench_id_00080", "label": "incorrect", "by": "llm", "reason": "The answer gives a working\u2011capital figure of $12.416\u202fB, which differs from the gold answer\u2019s $1.6\u202fB, so the key fact is incorrect.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer gives a working\u2011capital figure of $12.416\u202fB, which differs from the gold answer\u2019s $1.6\u202fB, so the key fact is incorrect.\"}"}
+{"key": "financebench_id_00684", "label": "correct", "by": "llm", "reason": "The answer correctly states that Amcor\u2019s gross margin declined (by about 0.8%) and that there is no improving margin profile, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that Amcor\u2019s gross margin declined (by about 0.8%) and that there is no improving margin profile, matching the gold answer.\"}"}
+{"key": "financebench_id_01865", "label": "correct", "by": "llm", "reason": "The answer correctly states that the consumer segment had a negative organic sales growth of 0.9%, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that the consumer segment had a negative organic sales growth of 0.9%, matching the gold answer.\"}"}
+{"key": "financebench_id_00566", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer\u2019s key fact that Verizon\u2019s debt decreased by $229\u202fmillion between 2021 and 2022.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer matches the gold answer\u2019s key fact that Verizon\u2019s debt decreased by $229\u202fmillion between 2021 and 2022.\"}"}
+{"key": "financebench_id_00651", "label": "incorrect", "by": "llm", "reason": "The answer gives a range (2.5%\u20134.5%) and incorrectly claims it is lower than 3.6%, whereas the gold answer specifies a precise 3.5% growth rate, slightly below 3.6%.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer gives a range (2.5%\u20134.5%) and incorrectly claims it is lower than 3.6%, whereas the gold answer specifies a precise 3.5% growth rate, slightly below 3.6%.\"}"}
+{"key": "financebench_id_00585", "label": "incorrect", "by": "llm", "reason": "The answer gives the wrong sign and magnitude for both FY2022 and FY2021 effective tax rates, contradicting the gold answer.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer gives the wrong sign and magnitude for both FY2022 and FY2021 effective tax rates, contradicting the gold answer.\"}"}
+{"key": "financebench_id_00460", "label": "incorrect", "by": "llm", "reason": "The answer cites a decline from 931 to 908 (23 stores) instead of the gold answer\u2019s decline from 982 to 969 (13 stores).", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer cites a decline from 931 to 908 (23 stores) instead of the gold answer\u2019s decline from 982 to 969 (13 stores).\"}"}
+{"key": "financebench_id_00499", "label": "incorrect", "by": "llm", "reason": "The answer contradicts the gold answer by claiming 3M is capital\u2011intensive, whereas the gold answer states it is not and provides specific efficiency metrics.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer contradicts the gold answer by claiming 3M is capital\u2011intensive, whereas the gold answer states it is not and provides specific efficiency metrics.\"}"}
+{"key": "financebench_id_01474", "label": "correct", "by": "llm", "reason": "The answer provides the same key facts and numbers as the gold answer, confirming the guidance increase due to a strong start in FY2023.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer provides the same key facts and numbers as the gold answer, confirming the guidance increase due to a strong start in FY2023.\"}"}
+{"key": "financebench_id_01858", "label": "correct", "by": "llm", "reason": "The answer confirms a stable dividend trend and cites 65 consecutive years of increases, matching the gold answer's key facts.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer confirms a stable dividend trend and cites 65 consecutive years of increases, matching the gold answer's key facts.\"}"}
+{"key": "financebench_id_00438", "label": "correct", "by": "llm", "reason": "The answer correctly states that Adobe\u2019s operating margin declined by about 2.1% from FY2021 to FY2022, matching the gold answer\u2019s 2.2% drop and concluding that the margin is not improving.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that Adobe\u2019s operating margin declined by about 2.1% from FY2021 to FY2022, matching the gold answer\u2019s 2.2% drop and concluding that the margin is not improving.\"}"}
+{"key": "financebench_id_00215", "label": "incorrect", "by": "llm", "reason": "The answer uses a different metric (capex-to-revenue) instead of the capital intensity ratio of assets to revenue given in the gold answer.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer uses a different metric (capex-to-revenue) instead of the capital intensity ratio of assets to revenue given in the gold answer.\"}"}
+{"key": "financebench_id_01936", "label": "correct", "by": "llm", "reason": "The answer correctly states that 81\u202fmillion of the 93\u202fmillion total liability is employee-related, which is approximately 87%, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that 81\u202fmillion of the 93\u202fmillion total liability is employee-related, which is approximately 87%, matching the gold answer.\"}"}
+{"key": "financebench_id_01902", "label": "incorrect", "by": "llm", "reason": "The answer cites Computing and Mobile Phones as the top performer, whereas the gold answer states that the Entertainment segment had the highest growth in Q2 FY2024.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer cites Computing and Mobile Phones as the top performer, whereas the gold answer states that the Entertainment segment had the highest growth in Q2 FY2024.\"}"}
+{"key": "financebench_id_00746", "label": "correct", "by": "llm", "reason": "The answer correctly states that Ulta Beauty has no debt securities registered to trade on a national securities exchange as of FY2023, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that Ulta Beauty has no debt securities registered to trade on a national securities exchange as of FY2023, matching the gold answer.\"}"}
+{"key": "financebench_id_00995", "label": "correct", "by": "llm", "reason": "The answer lists the same product categories as the gold answer and adds only non\u2011contradictory extra detail.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer lists the same product categories as the gold answer and adds only non\u2011contradictory extra detail.\"}"}
+{"key": "financebench_id_01009", "label": "incorrect", "by": "llm", "reason": "The answer lumps several geographies together and does not list all ten distinct regions specified in the gold answer.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer lumps several geographies together and does not list all ten distinct regions specified in the gold answer.\"}"}
+{"key": "financebench_id_04854", "label": "incorrect", "by": "llm", "reason": "The answer gives a free cash flow of 3,215.4\u202fmillion, which differs from the gold answer of 3,215.00\u202fmillion beyond the required precision.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer gives a free cash flow of 3,215.4\u202fmillion, which differs from the gold answer of 3,215.00\u202fmillion beyond the required precision.\"}"}

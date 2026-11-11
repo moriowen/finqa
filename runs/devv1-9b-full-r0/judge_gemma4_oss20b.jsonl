@@ -1,0 +1,51 @@
+{"key": "financebench_id_00917", "label": "refusal", "by": "status"}
+{"key": "financebench_id_08286", "label": "correct", "by": "code"}
+{"key": "financebench_id_00685", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04103", "label": "correct", "by": "code"}
+{"key": "financebench_id_09724", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01981", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00705", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04209", "label": "correct", "by": "code"}
+{"key": "financebench_id_00438", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10136", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00723", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04254", "label": "correct", "by": "code"}
+{"key": "financebench_id_00464", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10420", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00790", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04302", "label": "correct", "by": "code"}
+{"key": "financebench_id_01254", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02987", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00799", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04412", "label": "correct", "by": "code"}
+{"key": "financebench_id_01290", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00591", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00222", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03031", "label": "correct", "by": "code"}
+{"key": "financebench_id_00807", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04700", "label": "correct", "by": "code"}
+{"key": "financebench_id_00669", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00283", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03718", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04735", "label": "correct", "by": "code"}
+{"key": "financebench_id_01490", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00678", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03838", "label": "correct", "by": "code"}
+{"key": "financebench_id_05915", "label": "correct", "by": "code"}
+{"key": "financebench_id_01912", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00563", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer, stating that the Data Center segment had the highest proportional sales increase.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer matches the gold answer, stating that the Data Center segment had the highest proportional sales increase.\"}"}
+{"key": "financebench_id_02049", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer's conclusion that the risk decreased.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer matches the gold answer's conclusion that the risk decreased.\"}"}
+{"key": "financebench_id_00882", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer\u2019s key figure of $8,400,000,000.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer matches the gold answer\u2019s key figure of $8,400,000,000.\"}"}
+{"key": "financebench_id_01244", "label": "correct", "by": "llm", "reason": "The answer correctly states that CVS Health paid dividends in Q2 of FY2022, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that CVS Health paid dividends in Q2 of FY2022, matching the gold answer.\"}"}
+{"key": "financebench_id_00302", "label": "correct", "by": "llm", "reason": "The answer correctly states that Pfizer grew its PPNE between FY20 and FY21, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that Pfizer grew its PPNE between FY20 and FY21, matching the gold answer.\"}"}
+{"key": "financebench_id_01091", "label": "correct", "by": "llm", "reason": "The answer correctly states that Boeing has reported materially important ongoing legal battles in FY2022.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that Boeing has reported materially important ongoing legal battles in FY2022.\"}"}
+{"key": "financebench_id_00956", "label": "correct", "by": "llm", "reason": "The answer correctly states that JnJ's FY2022 financials are not of a high growth company, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that JnJ's FY2022 financials are not of a high growth company, matching the gold answer.\"}"}
+{"key": "financebench_id_00684", "label": "correct", "by": "llm", "reason": "The answer correctly states that AMCOR does not have an improving gross margin profile, matching the gold answer's conclusion.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that AMCOR does not have an improving gross margin profile, matching the gold answer's conclusion.\"}"}
+{"key": "financebench_id_03882", "label": "correct", "by": "llm", "reason": "The answer 1,615.9 million matches the gold answer of 1,616.00 within acceptable rounding precision.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer 1,615.9 million matches the gold answer of 1,616.00 within acceptable rounding precision.\"}"}
+{"key": "financebench_id_00394", "label": "correct", "by": "llm", "reason": "The answer correctly identifies Corporate & Investment Bank (CIB) as the segment with the highest net income.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies Corporate & Investment Bank (CIB) as the segment with the highest net income.\"}"}
+{"key": "financebench_id_02119", "label": "incorrect", "by": "llm", "reason": "The answer gives a different number (0.09) than the gold answer ($66.56 per share).", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer gives a different number (0.09) than the gold answer ($66.56 per share).\"}"}
+{"key": "financebench_id_00080", "label": "correct", "by": "llm", "reason": "The answer correctly states that PayPal has positive working capital for FY2022, matching the gold answer's conclusion.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that PayPal has positive working capital for FY2022, matching the gold answer's conclusion.\"}"}
+{"key": "financebench_id_01482", "label": "correct", "by": "llm", "reason": "The answer correctly states that the proposal was defeated, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that the proposal was defeated, matching the gold answer.\"}"}
+{"key": "financebench_id_00822", "label": "correct", "by": "llm", "reason": "The answer correctly identifies Richard A. Johnson as the nominee with substantially more votes against him and provides matching vote counts consistent with the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly identifies Richard A. Johnson as the nominee with substantially more votes against him and provides matching vote counts consistent with the gold answer.\"}"}
+{"key": "financebench_id_01936", "label": "incorrect", "by": "llm", "reason": "The answer does not provide the 87% employee liability figure required by the gold answer and instead gives unrelated details.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer does not provide the 87% employee liability figure required by the gold answer and instead gives unrelated details.\"}"}
+{"key": "financebench_id_00288", "label": "correct", "by": "llm", "reason": "The answer correctly states a drop in Cash & Cash equivalents and the dollar amount ($781\u202fmillion) is consistent with the ~42% decline indicated in the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states a drop in Cash & Cash equivalents and the dollar amount ($781\u202fmillion) is consistent with the ~42% decline indicated in the gold answer.\"}"}

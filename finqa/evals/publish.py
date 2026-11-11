@@ -9,7 +9,7 @@ import json
 from .. import paths
 from ..cli import read_jsonl
 from .gold import gold
-from .report import paper_baselines, paper_calibration, run_metrics
+from .report import files, paper_baselines, paper_calibration, run_metrics, verifier_check
 
 OUT = paths.ROOT / "results"
 
@@ -20,8 +20,9 @@ def _cell(s: str) -> str:
 
 def answers_md(run: str) -> str:
     g = gold()
-    rows = {r["qid"]: r for r in read_jsonl(paths.RUNS / run / "final.jsonl")}
-    labs = {r["key"]: r["label"] for r in read_jsonl(paths.RUNS / run / "judge.jsonl")}
+    fin, jud = files(run)
+    rows = {r["qid"]: r for r in read_jsonl(paths.RUNS / run / fin)}
+    labs = {r["key"]: r["label"] for r in read_jsonl(paths.RUNS / run / jud)}
     lines = [f"# Answers with provenance\n",
              f"Configuration: `{run}`. One section per question, in dataset order. "
              "Status ANSWER = all checks passed; NOT_FOUND / AMBIGUOUS = the system abstained (the reason says which check failed). "
@@ -33,7 +34,9 @@ def answers_md(run: str) -> str:
         if r is None:
             lines.append("_Not run._\n")
             continue
-        lines.append(f"**Status:** {r['status']} · **Judge:** {labs.get(qid, 'n/a')}\n")
+        m = r.get("models") or {}
+        lines.append(f"**Status:** {r['status']} · **Judge:** {labs.get(qid, 'n/a')} · "
+                     f"**Models:** answer `{m.get('answer')}`, verifier `{m.get('verifier')}`\n")
         if r["status"] == "ANSWER":
             lines.append(f"**Answer:** {_cell(r['answer'])}\n")
             if r.get("computation"):
@@ -60,8 +63,10 @@ def main(argv=None):
     (OUT / "answers.md").write_text(answers_md(a.main))
     summary = {"main": a.main, "runs": {r: run_metrics(r) for r in [a.main] + a.runs},
                "paper_baselines": paper_baselines()}
+    summary["verifier_check"] = {r: v for r in [a.main] + a.runs if (v := verifier_check(r))}
     try:
         summary["judge_calibration"] = paper_calibration()
+        summary["judge_calibration_120b"] = paper_calibration("judge_paper.jsonl")
     except Exception as e:  # noqa: BLE001
         summary["judge_calibration"] = {"error": repr(e)}
     (OUT / "summary.json").write_text(json.dumps(summary, indent=1, default=str))

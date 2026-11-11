@@ -118,6 +118,7 @@ def cmd_run(a):
     # A18: also grade every pre-verifier candidate, to measure verifier false rejects and false accepts
     cout = run / f"judge_cands{a.out or ''}.jsonl"
     cdone = {r["key"] for r in read_jsonl(cout)}
+    cl = llm.client()  # new client: the first one is bound to the event loop that asyncio.run closed
     ctasks = []
     for r in read_jsonl(run / "pass1.jsonl"):
         if r.get("status") != "CANDIDATE" or "__" in r["qid"] or r["key"] in cdone:

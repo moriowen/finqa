@@ -1,0 +1,13 @@
+{
+ "run": "all-2b-full-gloss",
+ "set": "all",
+ "mode": "full",
+ "arm": "r1",
+ "path": "A",
+ "unans": false,
+ "glossary": true,
+ "images": false,
+ "budget": 12,
+ "limit": 24,
+ "model": "Qwen/Qwen3.5-2B"
+}

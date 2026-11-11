@@ -1,0 +1,13 @@
+{
+ "run": "unans-9b-full-gloss",
+ "set": "all",
+ "mode": "full",
+ "arm": "r1",
+ "path": "A",
+ "unans": true,
+ "glossary": true,
+ "images": false,
+ "budget": 12,
+ "limit": 24,
+ "model": "Qwen/Qwen3.5-9B"
+}

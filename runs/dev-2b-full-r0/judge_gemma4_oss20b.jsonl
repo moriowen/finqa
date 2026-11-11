@@ -1,0 +1,51 @@
+{"key": "financebench_id_04209", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01091", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00438", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10136", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02049", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00723", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04254", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00464", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10420", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02119", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00790", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04302", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00563", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00080", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02987", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00799", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04412", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01290", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00591", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00222", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03031", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00807", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04700", "label": "correct", "by": "code"}
+{"key": "financebench_id_00669", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00283", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03718", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00822", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04735", "label": "correct", "by": "code"}
+{"key": "financebench_id_01490", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00678", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00288", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03838", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00882", "label": "refusal", "by": "status"}
+{"key": "financebench_id_05915", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01912", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00684", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00302", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00917", "label": "refusal", "by": "status"}
+{"key": "financebench_id_08286", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01936", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00685", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00394", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04103", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00956", "label": "refusal", "by": "status"}
+{"key": "financebench_id_09724", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01981", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00705", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01482", "label": "correct", "by": "llm", "reason": "The answer states the proposal was defeated, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer states the proposal was defeated, matching the gold answer.\"}"}
+{"key": "financebench_id_03882", "label": "correct", "by": "llm", "reason": "The answer provides the same figure ($1,615.9 million \u2248 $1,616.00) and cites the correct line item, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer provides the same figure ($1,615.9 million \u2248 $1,616.00) and cites the correct line item, matching the gold answer.\"}"}
+{"key": "financebench_id_01244", "label": "incorrect", "by": "llm", "reason": "The answer contradicts the gold answer by stating CVS did not pay a dividend in Q2 FY2022, whereas the gold answer confirms a $0.55 quarterly dividend was paid.", "raw": "{\"label\":\"incorrect\",\"reason\":\"The answer contradicts the gold answer by stating CVS did not pay a dividend in Q2 FY2022, whereas the gold answer confirms a $0.55 quarterly dividend was paid.\"}"}
+{"key": "financebench_id_01254", "label": "correct", "by": "llm", "reason": "The answer correctly states that MGM Resorts paid dividends in FY2022, matching the gold answer\u2019s conclusion; the additional cash flow figure is not contradictory.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that MGM Resorts paid dividends in FY2022, matching the gold answer\u2019s conclusion; the additional cash flow figure is not contradictory.\"}"}

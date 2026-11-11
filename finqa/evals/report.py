@@ -15,11 +15,26 @@ from ..cli import read_jsonl
 from .gold import gold
 
 LABELS = ("correct", "incorrect", "refusal")
+# Final setup (A23): Gemma 4 12B verifier files end in _gemma4, gpt-oss-20b judge files in _oss20b.
+VER = os.environ.get("FINQA_VERIFIER_TAG", "_gemma4")
+JUD = os.environ.get("FINQA_JUDGE_TAG", "_oss20b")
+
+
+def files(run: str) -> tuple[str, str]:
+    """(final file, judge file) of a run. Bare runs have no verifier, so they use final.jsonl."""
+    d = paths.RUNS / run
+    if (d / f"final{VER}.jsonl").exists():
+        return f"final{VER}.jsonl", f"judge{VER}{JUD}.jsonl"
+    return "final.jsonl", f"judge{JUD}.jsonl"
 
 
 def labels(run: str, thinking: bool = False) -> dict[str, str]:
-    j = read_jsonl(paths.RUNS / run / ("judge_think.jsonl" if thinking else "judge.jsonl"))
+    j = read_jsonl(paths.RUNS / run / ("judge_think.jsonl" if thinking else files(run)[1]))
     return {r["key"]: r["label"] for r in j}
+
+
+def test_ids() -> set[str]:
+    return set(json.loads(paths.SPLIT.read_text())["test"])
 
 
 def rates(labs: list[str]) -> dict:
@@ -44,7 +59,7 @@ def provenance(run: str) -> dict:
     """E4: for ANSWER rows on real questions, is a cited page a gold page of the gold filing?"""
     g = gold()
     hit = doc_ok = n = 0
-    for r in read_jsonl(paths.RUNS / run / "final.jsonl"):
+    for r in read_jsonl(paths.RUNS / run / files(run)[0]):
         if r["status"] != "ANSWER" or "__" in r["qid"]:
             continue
         gd = g[r["qid"]]
@@ -78,6 +93,10 @@ def run_metrics(run: str, thinking: bool = False) -> dict:
             by.setdefault(g[k]["question_type"], []).append(v)
         out["by_type"] = {t: rates(v) for t, v in sorted(by.items())}
         out["provenance"] = provenance(run)
+        t = [v for k, v in real.items() if k in test_ids()]
+        if t:
+            out["test"] = rates(t)
+            out["test"]["wrong_ci"] = bootstrap(t, "wrong_rate")
     if unans:
         fa = [v for v in unans.values()]
         out["unanswerable"] = {"n": len(fa), "false_answer": sum(v == "answer" for v in fa),
@@ -102,7 +121,20 @@ def mcnemar(run_a: str, run_b: str) -> dict:
     return {"a": run_a, "b": run_b, "a_only_correct": n01, "b_only_correct": n10, "p_exact": p}
 
 
-def paper_calibration() -> dict:
+def verifier_check(run: str) -> dict | None:
+    """Verifier decision vs judge label on the pre-verifier candidates (A18)."""
+    d = paths.RUNS / run
+    ver = {r["key"]: r["pass"] for r in read_jsonl(d / f"pass2{VER}.jsonl")}
+    lab = {r["key"]: r["label"] for r in read_jsonl(d / f"judge_cands{VER}{JUD}.jsonl")}
+    ks = [k for k in ver if k in lab]
+    if not ks:
+        return None
+    q = lambda a, ok: sum(ver[k] == a and (lab[k] == "correct") == ok for k in ks)  # noqa: E731
+    return {"n": len(ks), "accept_correct": q(True, True), "accept_wrong": q(True, False),
+            "reject_correct": q(False, True), "reject_wrong": q(False, False)}
+
+
+def paper_calibration(file: str | None = None) -> dict:
     """E3: our judge on the paper's 2,400 answers vs their human labels."""
     human = {}
     for f in sorted(glob.glob(str(paths.PAPER_RESULTS / "*.jsonl"))):
@@ -110,7 +142,7 @@ def paper_calibration() -> dict:
         for r in read_jsonl(f):
             human[f"{cfg}|{r['financebench_id']}"] = {"Correct Answer": "correct", "Incorrect Answer": "incorrect",
                                                       "Refusal": "refusal"}[r["label"]]
-    ours = {r["key"]: r["label"] for r in read_jsonl(paths.RUNS / "judge_paper.jsonl")}
+    ours = {r["key"]: r["label"] for r in read_jsonl(paths.RUNS / (file or f"judge_paper{JUD}.jsonl"))}
     keys = [k for k in ours if k in human]
     conf = {h: {o: 0 for o in LABELS} for h in LABELS}
     for k in keys:

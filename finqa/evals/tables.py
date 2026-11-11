@@ -7,14 +7,15 @@ import json
 
 from .. import paths
 from ..cli import read_jsonl
+from .report import files
 
 
 def pct(x) -> str:
-    return "–" if x is None else f"{100 * x:.0f}%"
+    return "n/a" if x is None else f"{100 * x:.0f}%"
 
 
 def ci(t) -> str:
-    return "" if not t else f" [{100 * t[0]:.0f}–{100 * t[1]:.0f}]"
+    return "" if not t else f" [{100 * t[0]:.0f} to {100 * t[1]:.0f}]"
 
 
 def main():
@@ -22,10 +23,10 @@ def main():
     runs = s["runs"]
     out = []
 
-    out.append("### Model size × harness (150 questions, Path A)\n")
-    out.append("| Model | Setting | Correct | Wrong | Refused | Wrong-answer rate [95% CI] | Coverage | Selective accuracy | Page hit |")
-    out.append("|---|---|---|---|---|---|---|---|---|")
-    for size in ("27b", "9b", "2b"):
+    out.append("### Model size × harness (150 questions, Path A; verifier Gemma 4 12B, judge gpt-oss-20b)\n")
+    out.append("| Model | Setting | Correct | Wrong | Refused | Wrong-answer rate [95% CI] | Coverage | Selective accuracy | Page hit | Test only (99): wrong / correct |")
+    out.append("|---|---|---|---|---|---|---|---|---|---|")
+    for size in ("9b", "2b"):
         for setting in ("bare", "full", "full-gloss", "oracle"):
             r = runs.get(f"all-{size}-{setting}")
             if not r or not r.get("real"):
@@ -33,12 +34,13 @@ def main():
             x = r["real"]
             ph = (r.get("provenance") or {}).get("page_hit_rate") if setting != "bare" else None
             out.append(f"| Qwen3.5-{size.upper()} | {setting} | {x['correct']} | {x['incorrect']} | {x['refusal']} | "
-                       f"{pct(x['wrong_rate'])}{ci(x.get('wrong_ci'))} | {pct(x['coverage'])} | {pct(x['selective_acc'])} | {pct(ph)} |")
+                       f"{pct(x['wrong_rate'])}{ci(x.get('wrong_ci'))} | {pct(x['coverage'])} | {pct(x['selective_acc'])} | {pct(ph)} | "
+                       f"{pct((r.get('test') or {}).get('wrong_rate'))} / {pct((r.get('test') or {}).get('accuracy'))} |")
 
     out.append("\n### Questions with no answer in the filing (E6, 290 per model)\n")
     out.append("| Model | Setting | False answers | Wrong filing | Shifted year |")
     out.append("|---|---|---|---|---|")
-    for size in ("27b", "9b", "2b"):
+    for size in ("9b", "2b"):
         for setting in ("bare", "full", "full-gloss"):
             r = runs.get(f"unans-{size}-{setting}")
             if not r or not r.get("unanswerable"):
@@ -61,9 +63,19 @@ def main():
         if any(k in b["config"] for k in ("singleStore", "sharedStore", "oracle")) and "reverse" not in b["config"]:
             out.append(f"| {b['config']} | {b['correct']} | {b['incorrect']} | {b['refusal']} | {pct(b['wrong_rate'])} | {pct(b['coverage'])} |")
 
-    jc = s.get("judge_calibration") or {}
-    if jc.get("n"):
-        out.append("\n### Judge calibration (E3): gpt-oss-120b vs the paper's 2,400 human labels\n")
+    vc = s.get("verifier_check") or {}
+    if vc:
+        out.append("\n### Verifier (Gemma 4 12B) vs judge, on answers that passed the code checks\n")
+        out.append("| Run | Checked | Accepted correct | Accepted wrong (leaks) | Rejected correct (lost) | Rejected wrong (caught) |")
+        out.append("|---|---|---|---|---|---|")
+        for k, v in vc.items():
+            out.append(f"| {k} | {v['n']} | {v['accept_correct']} | {v['accept_wrong']} | {v['reject_correct']} | {v['reject_wrong']} |")
+
+    for key, name in (("judge_calibration", "gpt-oss-20b (used)"), ("judge_calibration_120b", "gpt-oss-120b (reference)")):
+        jc = s.get(key) or {}
+        if not jc.get("n"):
+            continue
+        out.append(f"\n### Judge calibration (E3): {name} vs the paper's 2,400 human labels\n")
         out.append(f"Agreement {pct(jc['agreement'])}. Judge says *correct* when humans say *incorrect*: "
                    f"{pct(jc['false_correct_rate'])}. Judge says *incorrect* when humans say *correct*: {pct(jc['false_incorrect_rate'])}.\n")
         out.append("| Human \\ Judge | correct | incorrect | refusal |\n|---|---|---|---|")
@@ -84,11 +96,7 @@ def main():
         c = r.get("cost") or {}
         if k.startswith("all-") and c:
             out.append(f"| {k} | {c['calls_per_q']:.1f} | {c['llm_seconds_per_q']:.1f} | {c['tokens_per_q']:,.0f} |")
-    if dec.exists():
-        dd = json.loads(dec.read_text())
-        main_run = f"all-{dd['main']}-full" + ("-gloss" if dd["glossary"] else "")
-    else:
-        main_run = "all-27b-full"
+    main_run = s["main"]
     out.append(f"\n### Where answers are lost ({main_run}, 150 questions)\n")
     out.append("| Stage outcome | Questions |\n|---|---|")
     for k, n in funnel(main_run):
@@ -99,7 +107,7 @@ def main():
 def funnel(run: str) -> list[tuple[str, int]]:
     from collections import Counter
     c = Counter()
-    for r in read_jsonl(paths.RUNS / run / "final.jsonl"):
+    for r in read_jsonl(paths.RUNS / run / files(run)[0]):
         if "__" in r["qid"]:
             continue
         why = r.get("reason") or ""

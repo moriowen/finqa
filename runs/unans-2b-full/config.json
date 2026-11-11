@@ -1,0 +1,13 @@
+{
+ "run": "unans-2b-full",
+ "set": "all",
+ "mode": "full",
+ "arm": "r1",
+ "path": "A",
+ "unans": true,
+ "glossary": false,
+ "images": false,
+ "budget": 12,
+ "limit": 24,
+ "model": "Qwen/Qwen3.5-2B"
+}

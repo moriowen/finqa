@@ -1,0 +1,5 @@
+{"key": "financebench_id_04700|MICROSOFT_2016_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_04735|ADOBE_2015_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_04209|COSTCO_2021_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_03882|AMCOR_2020_10K", "label": "correct", "by": "llm", "reason": "The answer gives the same figure (1,615.9 \u2248 1,616.00) and cites the correct line item, matching the gold answer.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer gives the same figure (1,615.9 \u2248 1,616.00) and cites the correct line item, matching the gold answer.\"}"}
+{"key": "financebench_id_01254|MGMRESORTS_2022_10K", "label": "correct", "by": "llm", "reason": "The answer correctly states that MGM Resorts paid dividends to common shareholders in FY2022, matching the gold answer\u2019s yes/no conclusion.", "raw": "{\"label\":\"correct\",\"reason\":\"The answer correctly states that MGM Resorts paid dividends to common shareholders in FY2022, matching the gold answer\u2019s yes/no conclusion.\"}"}
