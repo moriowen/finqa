@@ -6,14 +6,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 STAGE="${1:?dev or final}"
-BIG="H100|H200|A100-80GB"                          # 27B bf16 and gpt-oss-120b need 80 GB
-ANY="H100|H200|A100-80GB|A100-40GB|L40S|A40"       # 2B, 9B, embedding
+BIG="H100|H200|A100-80GB|RTX-Pro-Blackwell"                        # 27B bf16 and gpt-oss-120b need 80 GB
+ANY="H100|H200|A100-80GB|A100-40GB|L40S|A40|RTX-Pro-Blackwell"     # 2B, 9B, embedding
 Q2=Qwen/Qwen3.5-2B; Q9=Qwen/Qwen3.5-9B; Q27=Qwen/Qwen3.5-27B
 JUDGE=openai/gpt-oss-120b; EMB=Qwen/Qwen3-Embedding-8B
 VL='--limit-mm-per-prompt {"image":8}'
 sub() {  # sub NAME CONSTRAINT MODEL "CMD" [DEPS] [EXTRA SERVE ARGS] [MAXLEN] [TIME]
   local dep=""; [ -n "${5:-}" ] && dep="--dependency=afterany:$5"
-  sbatch --parsable -J "$1" --constraint="$2" -t "${8:-4:00:00}" $dep \
+  sbatch --parsable -J "$1" -p ice-gpu,ice-bw-gpu --constraint="$2" -t "${8:-4:00:00}" $dep \
     --export=ALL,MODEL="$3",CMD="$4",SERVE_ARGS="${6:-}",MAXLEN="${7:-32768}" pace/job.sbatch
 }
 P1="python -m finqa.cli pass1"
