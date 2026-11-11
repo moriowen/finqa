@@ -93,8 +93,8 @@ async def classify_refusal(cl, key: str, question: str, answer_text: str) -> dic
 
 def cmd_run(a):
     run = paths.RUNS / a.run
-    src = run / ("final_think.jsonl" if a.thinking else "final.jsonl")
-    out = run / ("judge_think.jsonl" if a.thinking else "judge.jsonl")
+    src = run / (f"final{a.src}.jsonl" if a.src is not None else ("final_think.jsonl" if a.thinking else "final.jsonl"))
+    out = run / (f"judge{a.out}.jsonl" if a.out is not None else ("judge_think.jsonl" if a.thinking else "judge.jsonl"))
     rows = read_jsonl(src)
     done = {r["key"] for r in read_jsonl(out)}
     g = gold()
@@ -116,7 +116,7 @@ def cmd_run(a):
     print(f"judge {a.run}: {len(tasks)} to grade", file=sys.stderr)
     asyncio.run(run_tasks(tasks, out, a.limit))
     # A18: also grade every pre-verifier candidate, to measure verifier false rejects and false accepts
-    cout = run / "judge_cands.jsonl"
+    cout = run / f"judge_cands{a.out or ''}.jsonl"
     cdone = {r["key"] for r in read_jsonl(cout)}
     ctasks = []
     for r in read_jsonl(run / "pass1.jsonl"):
@@ -134,7 +134,7 @@ async def _const(key, label):
 
 
 def cmd_paper(a):
-    out = paths.RUNS / "judge_paper.jsonl"
+    out = paths.RUNS / f"judge_paper{a.out or ''}.jsonl"
     done = {r["key"] for r in read_jsonl(out)}
     g = gold()
     cl = llm.client()
@@ -157,9 +157,12 @@ def main(argv=None):
     s = sub.add_parser("run")
     s.add_argument("--run", required=True)
     s.add_argument("--thinking", action="store_true")
+    s.add_argument("--src", default=None, help="final file suffix to grade, e.g. _phi4")
+    s.add_argument("--out", default=None, help="judge file suffix, e.g. _phi4_oss20b")
     s.add_argument("--limit", type=int, default=32)
     s.set_defaults(func=cmd_run)
     s = sub.add_parser("paper")
+    s.add_argument("--out", default=None)
     s.add_argument("--limit", type=int, default=48)
     s.set_defaults(func=cmd_paper)
     a = ap.parse_args(argv)

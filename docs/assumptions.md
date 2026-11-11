@@ -513,6 +513,19 @@ The full architecture and the impact of each assumption change are in [`architec
   - Type (b), year outside the filing: the year in the question moves **at least 5 years** before the filing year. Example: "3M FY2012 capex" + 3M 2018 10-K (which covers 2016–2018). Dangerous output: the 2016 value, presented as 2012.
   - One of each type per real question: 300 questions. The label is known from the construction, so no manual labeling.
 
+## A23. Verifier and judge under a compute limit
+
+- **Status:** Decided (user, 2026-11-11).
+- **Problem:** the 27B verifier and the gpt-oss-120b judge need 80 GB GPUs. On ICE these were fully booked for hours. The free Blackwell GPUs expose 47.4 GB each.
+- **Second problem:** the 27B verifier is the same family as the answering models, so their blind spots can overlap. A22 already chose a different family for the judge for this reason; the verifier did not follow the same rule.
+- **Decision:** a vision model from a **different family** that fits in 47 GB verifies the 2B and 9B runs: `microsoft/Phi-4-reasoning-vision-15B` (Jan 2026, MIT, 15B; supported by vLLM 0.32 as `Phi4ForCausalLMV`). The judge for these runs is `openai/gpt-oss-20b`, calibrated on the same 2,400 human labels as gpt-oss-120b (E3).
+- **Candidates checked (2026-11-11):** Phi-4-reasoning-vision-15B (chosen: newest, reasons step by step), Ministral-3-14B-Instruct-2512, granite-vision-4.1-4b, Kimi-VL-A3B-Instruct. Gemma excluded (user). InternVL and MiniCPM-V excluded (Qwen-based language models).
+- **Measurement:** Phi-4 also verifies the dev-1 candidates that gpt-oss-120b already graded, so Phi-4 and 27B are compared on the same answers.
+- **27B, the 27B verifier and gpt-oss-120b** stay queued and run when an 80 GB GPU frees up.
+- **Reasoning verifier:** no enforced JSON schema (it would cut off the reasoning). The model reasons, then ends with one JSON object, which the client reads.
+- **Limitation for the write-up:** the compute limit decided the verifier and judge sizes, not the dev results.
+- **Future scope (more compute):** 27B or larger answering model; a large verifier from another family; gpt-oss-120b as the judge for every run; verifier thinking on; several samples per question with agreement voting; retrieval arm R3 with a larger page budget.
+
 ## A7. Acceptable wrong-answer rate
 
 - **Status:** Decided (2026-11-11). There is no hard target. Keep the wrong-answer rate as low as possible, and report the full trade-off curve.

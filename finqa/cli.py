@@ -127,26 +127,33 @@ def cmd_pass1(a):
 def cmd_pass2(a):
     run = paths.RUNS / a.run
     p1 = {r["key"]: r for r in read_jsonl(run / "pass1.jsonl") if "key" in r}
-    vout = run / ("pass2_think.jsonl" if a.thinking else "pass2.jsonl")
+    suffix = a.suffix or ("_think" if a.thinking else "")
+    vout = run / f"pass2{suffix}.jsonl"
     done = {r["key"] for r in read_jsonl(vout)}
     cl = llm.client()
     todo = [r for r in p1.values() if r["status"] == "CANDIDATE" and r["key"] not in done]
     print(f"pass2 {a.run}: verify {len(todo)} candidates (model {llm.MODEL}, thinking={a.thinking})", file=sys.stderr)
-    asyncio.run(run_tasks([verify.verify(cl, r, r["question"], thinking=a.thinking) for r in todo], vout, a.limit))
-    finalize(a.run, thinking=a.thinking)
+    asyncio.run(run_tasks([verify.verify(cl, r, r["question"], thinking=a.thinking, free_json=a.free_json)
+                           for r in todo], vout, a.limit))
+    finalize(a.run, thinking=a.thinking, suffix=suffix)
 
 
-def finalize(run_name: str, thinking: bool = False) -> list[dict]:
+def finalize(run_name: str, thinking: bool = False, suffix: str | None = None) -> list[dict]:
     """Apply the verifier verdicts, then G8 per question. Writes final.jsonl (or final_think.jsonl)."""
     run = paths.RUNS / run_name
     p1 = [r for r in read_jsonl(run / "pass1.jsonl") if "key" in r]
-    ver = {r["key"]: r for r in read_jsonl(run / ("pass2_think.jsonl" if thinking else "pass2.jsonl"))}
+    suffix = suffix if suffix is not None else ("_think" if thinking else "")
+    ver = {r["key"]: r for r in read_jsonl(run / f"pass2{suffix}.jsonl")}
+    cfg0 = json.loads((run / "config.json").read_text())
     routes = {r["qid"]: r["candidates"] for r in read_jsonl(P0 / "route.jsonl")}
     by_q: dict[str, list[dict]] = {}
     for r in p1:
         r = dict(r)
+        r["answer_model"] = cfg0.get("model")
         if r["status"] == "CANDIDATE":
             v = ver.get(r["key"])
+            if v is not None:
+                r["verifier_model"] = v.get("model")
             if v is None:
                 r["status"], r["reason"] = "NOT_FOUND", "not verified (verifier pass missing)"
             elif v["pass"]:
@@ -168,7 +175,7 @@ def finalize(run_name: str, thinking: bool = False) -> list[dict]:
             if not cands and qid not in by_q and any(q.id == qid for q in question_set(cfg["set"], path_b=True)):
                 q = next(q for q in question_set(cfg["set"], path_b=True) if q.id == qid)
                 rows.append(verify.combine(qid, q.question, [], []))
-    out = run / ("final_think.jsonl" if thinking else "final.jsonl")
+    out = run / f"final{suffix}.jsonl"
     with open(out, "w") as f:
         for r in sorted(rows, key=lambda r: r["qid"]):
             f.write(json.dumps(r, default=str) + "\n")
@@ -177,7 +184,7 @@ def finalize(run_name: str, thinking: bool = False) -> list[dict]:
 
 
 def cmd_finalize(a):
-    finalize(a.run, thinking=a.thinking)
+    finalize(a.run, thinking=a.thinking, suffix=a.suffix)
 
 
 def cmd_embed(a):
@@ -238,11 +245,14 @@ def main(argv=None):
     s = sub.add_parser("pass2")
     s.add_argument("--run", required=True)
     s.add_argument("--thinking", action="store_true")
+    s.add_argument("--suffix", default=None, help="file suffix for a verifier variant, e.g. _phi4")
+    s.add_argument("--free-json", action="store_true", help="reasoning verifier: no enforced schema")
     s.add_argument("--limit", type=int, default=16)
     s.set_defaults(func=cmd_pass2)
     s = sub.add_parser("finalize")
     s.add_argument("--run", required=True)
     s.add_argument("--thinking", action="store_true")
+    s.add_argument("--suffix", default=None)
     s.set_defaults(func=cmd_finalize)
     s = sub.add_parser("embed")
     s.add_argument("--set", default="all")
