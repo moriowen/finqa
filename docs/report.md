@@ -50,3 +50,11 @@ Every 9B answer cites the right filing, and 84% cite a page that the dataset mar
 **What didn't.** A bigger model did not lower the wrong-answer rate. 27B is better without checks (33% wrong against 39%) but with them it answers more and is wrong more often (16% against 11%). The verifier is the weak part: it caught 8 of 26 wrong 9B answers and 4 of 26 wrong 27B answers. Most remaining errors are definition choices, such as working capital from total instead of operating items, or a different quick ratio. The numbers are real and correctly cited, so no check catches them. A glossary of definitions in the prompt made things worse. For 9B, retrieval was not the limit: with the gold pages it still got 71 right. 2B passes the checks on only 9% of questions.
 
 **With more time.** First, show the definition the system used, or ask the user, when a metric has more than one common definition. Second, have the verifier check the formula against the question, not only the values against the page. Third, recover some of the 35 questions that fail a code check twice, with a further retry or a larger model only on retry. The compute limit also shaped the runs: 80 GB GPUs were not available, so 27B ran in FP8, the verifier was a 12B model and the judge a 20B model, all with one seed. With more compute I would rerun at full precision with a larger verifier and judge, and several seeds.
+
+```{=html}
+<div class="figure-page">
+```
+![](diagrams/system-flow.svg)
+```{=html}
+</div>
+```
