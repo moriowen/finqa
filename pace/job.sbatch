@@ -22,7 +22,7 @@ if [ -z "${NO_SERVE:-}" ]; then
   python -c "from huggingface_hub import snapshot_download as s; p=s('$MODEL'); print('downloaded', p)"
   echo "download $(( $(date +%s) - t0 )) s, size $(du -sh "$HF_HOME" | cut -f1)"
   setsid vllm serve "$MODEL" --port "$PORT" --seed 0 --max-model-len "${MAXLEN:-16384}" \
-      --gpu-memory-utilization 0.90 ${SERVE_ARGS:-} > "pace/logs/vllm-$SLURM_JOB_ID.log" 2>&1 &
+      --gpu-memory-utilization 0.90 --max-num-seqs "${MAXSEQS:-64}" ${SERVE_ARGS:-} > "pace/logs/vllm-$SLURM_JOB_ID.log" 2>&1 &
   pid=$!
   trap 'kill -- -$pid 2>/dev/null || true; rm -rf "$HF_HOME"' EXIT
   for _ in $(seq 1 240); do
