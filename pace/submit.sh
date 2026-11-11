@@ -51,6 +51,33 @@ $P1 --run unans-$1-bare --set all --unans --mode bare --arm $ARM"; }
   p=$(sbatch --parsable -J publish --dependency=afterany:$j --export=ALL,CMD="python -m finqa.evals.dev_analysis > runs/dev_analysis.json; \
 python -m finqa.evals.publish --main all-${MAIN:-27b}-full --runs $RUNS $BARE > runs/publish.log 2>&1" pace/cpu.sbatch)
   echo "q27 $a | q9 $b | q2 $c | verifier $v | judge $j | publish $p"
+elif [ "$STAGE" = now ]; then
+  # Small models now (any GPU incl. Blackwell); 27B, verifier and judge wait for 80 GB GPUs.
+  # Arm r1 is fixed by the recall rule (no judge needed). Glossary: both variants, the rule picks one later.
+  ARM=r1
+  fin() { echo "$P1 --run all-$1-full --set all --arm $ARM && $P1 --run all-$1-full-gloss --set all --arm $ARM --glossary && \
+$P1 --run all-$1-bare --set all --mode bare --arm $ARM && $P1 --run all-$1-oracle --set all --mode oracle && \
+$P1 --run unans-$1-full --set all --unans --arm $ARM && $P1 --run unans-$1-full-gloss --set all --unans --arm $ARM --glossary && \
+$P1 --run unans-$1-bare --set all --unans --mode bare --arm $ARM"; }
+  b=$(sub q9-all "$ANY" $Q9 "$(fin 9b)" "${DEP9:-}" "$VL" 32768 3:00:00)
+  c=$(sub q2-all "$ANY" $Q2 "$(fin 2b)" "${DEP2:-}" "$VL" 32768 3:00:00)
+  a=$(sub q27-all "$BIG" $Q27 "$(fin 27b) && $P1 --run pathb-27b-full --set all --path B --arm $ARM" "${DEP27:-}" "$VL" 32768 6:00:00)
+  FULL=""; BARE=""
+  for z in 27b 9b 2b; do FULL="$FULL all-$z-full all-$z-full-gloss all-$z-oracle unans-$z-full unans-$z-full-gloss"; BARE="$BARE all-$z-bare unans-$z-bare"; done
+  FULL="$FULL pathb-27b-full"
+  DEVF="dev-27b-full-r0 dev-27b-oracle dev-27b-oracle-img dev-9b-full-r0 dev-2b-full-r0 dev-2b-full-r0-gloss"
+  DEVB="dev-27b-bare-r0 dev-9b-bare-r0 dev-2b-bare-r0"
+  V="python -m finqa.cli pass2"
+  v=$(sub v27 "$BIG" $Q27 "for r in $DEVF $FULL; do $V --run \$r; done; for r in dev-27b-full-r0 dev-9b-full-r0 dev-2b-full-r0; do $V --run \$r --thinking; done; \
+for r in $DEVB $BARE; do python -m finqa.cli finalize --run \$r; done" "$a:$b:$c${DEPV:+:$DEPV}" "$VL" 32768 8:00:00)
+  J="python -m finqa.evals.judge run"
+  j=$(sub judge "$BIG" $JUDGE "python -m finqa.evals.judge paper; for r in $DEVF $DEVB $FULL $BARE; do $J --run \$r; done; \
+for r in dev-27b-full-r0 dev-9b-full-r0 dev-2b-full-r0; do $J --run \$r --thinking; done" "$v" "" 32768 8:00:00)
+  p=$(sbatch --parsable -J publish -p ice-cpu --dependency=afterany:$j --export=ALL,CMD="python -m finqa.evals.autopilot > runs/decisions.env; \
+set -a; source runs/decisions.env; set +a; python -m finqa.evals.dev_analysis > runs/dev_analysis.json; \
+python -m finqa.evals.publish --main all-\${MAIN}-full\${GLOSS:+-gloss} --runs $FULL $BARE > runs/publish.log 2>&1; \
+python -m finqa.evals.tables > results/tables.md" pace/cpu.sbatch)
+  echo "q27 $a | q9 $b | q2 $c | verifier $v | judge $j | publish $p"
 elif [ "$STAGE" = auto ]; then
   sbatch --parsable -J autopilot ${DEP:+--dependency=afterany:$DEP} --export=ALL,CMD="python -m finqa.evals.autopilot > runs/decisions.env && \
 set -a && source runs/decisions.env && set +a && bash pace/submit.sh final > runs/final_jobs.txt" pace/cpu.sbatch

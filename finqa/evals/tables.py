@@ -26,12 +26,12 @@ def main():
     out.append("| Model | Setting | Correct | Wrong | Refused | Wrong-answer rate [95% CI] | Coverage | Selective accuracy | Page hit |")
     out.append("|---|---|---|---|---|---|---|---|---|")
     for size in ("27b", "9b", "2b"):
-        for setting in ("bare", "full", "oracle"):
+        for setting in ("bare", "full", "full-gloss", "oracle"):
             r = runs.get(f"all-{size}-{setting}")
             if not r or not r.get("real"):
                 continue
             x = r["real"]
-            ph = r.get("provenance", {}).get("page_hit_rate") if setting != "bare" else None
+            ph = (r.get("provenance") or {}).get("page_hit_rate") if setting != "bare" else None
             out.append(f"| Qwen3.5-{size.upper()} | {setting} | {x['correct']} | {x['incorrect']} | {x['refusal']} | "
                        f"{pct(x['wrong_rate'])}{ci(x.get('wrong_ci'))} | {pct(x['coverage'])} | {pct(x['selective_acc'])} | {pct(ph)} |")
 
@@ -39,7 +39,7 @@ def main():
     out.append("| Model | Setting | False answers | Wrong filing | Shifted year |")
     out.append("|---|---|---|---|---|")
     for size in ("27b", "9b", "2b"):
-        for setting in ("bare", "full"):
+        for setting in ("bare", "full", "full-gloss"):
             r = runs.get(f"unans-{size}-{setting}")
             if not r or not r.get("unanswerable"):
                 continue
@@ -84,7 +84,11 @@ def main():
         c = r.get("cost") or {}
         if k.startswith("all-") and c:
             out.append(f"| {k} | {c['calls_per_q']:.1f} | {c['llm_seconds_per_q']:.1f} | {c['tokens_per_q']:,.0f} |")
-    main_run = f"all-{json.loads(dec.read_text())['main']}-full" if dec.exists() else "all-27b-full"
+    if dec.exists():
+        dd = json.loads(dec.read_text())
+        main_run = f"all-{dd['main']}-full" + ("-gloss" if dd["glossary"] else "")
+    else:
+        main_run = "all-27b-full"
     out.append(f"\n### Where answers are lost ({main_run}, 150 questions)\n")
     out.append("| Stage outcome | Questions |\n|---|---|")
     for k, n in funnel(main_run):

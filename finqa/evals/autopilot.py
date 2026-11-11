@@ -13,6 +13,12 @@ Rules (A12, A16, A18, A19):
           whose dev wrong-answer rate is within 0.03 of the lowest. Ties -> the larger model.
 Missing data for a rule -> the default (r0, off, off, off, 27b).
 
+Change made 2026-11-11 12:50, while 27B waited for an 80 GB GPU (logged in docs/IMPLEMENTATION.md):
+  - The final runs use arm r1, the result of R-arm on the dev recall (recall needs no judge, so it was known).
+  - The final runs use verifier thinking OFF and page images OFF regardless of R-think and R-img, to finish without
+    waiting for the 27B dev results. Both experiments still run on dev and are reported.
+  - The final runs exist with and without the glossary; R-gloss picks which one is official.
+
   python -m finqa.evals.autopilot     # writes runs/decisions.json and prints KEY=VALUE lines
 """
 from __future__ import annotations
