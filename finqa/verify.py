@@ -14,7 +14,7 @@ async def verify(cl, rec: dict, question: str, thinking: bool = False) -> dict:
     content = [{"type": "text", "text": f"QUESTION: {question}\n\nFILING: {filing_info(rec['doc'])}\n\nEVIDENCE:\n{vals}\n\n"
                                         f"COMPUTATION: {comp}\n\nFINAL ANSWER: {rec['answer']}\n\n"
                                         f"IMAGES: pages {', '.join(str(p + 1) for p in pages)}, in this order."}]
-    content += [llm.image_part(parse.render_png(rec["doc"], p, dpi=110)) for p in pages]
+    content += [llm.image_part(parse.render_png(rec["doc"], p, dpi=150)) for p in pages]
     r = await llm.chat(cl, [{"role": "system", "content": prompts.VERIFIER_SYSTEM}, {"role": "user", "content": content}],
                        schema=prompts.VERIFIER_SCHEMA, max_tokens=4000 if thinking else 600, thinking=thinking)
     v = r.get("json") or {}

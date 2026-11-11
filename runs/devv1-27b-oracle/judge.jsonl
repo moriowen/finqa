@@ -1,0 +1,51 @@
+{"key": "financebench_id_04209", "label": "correct", "by": "code"}
+{"key": "financebench_id_00438", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10136", "label": "correct", "by": "code"}
+{"key": "financebench_id_02049", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00723", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04254", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10420", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00790", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04302", "label": "correct", "by": "code"}
+{"key": "financebench_id_01254", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02987", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04412", "label": "correct", "by": "code"}
+{"key": "financebench_id_01290", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00591", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00222", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03031", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00807", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04700", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01482", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00669", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00283", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03718", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00822", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04735", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01490", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00678", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00288", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03838", "label": "correct", "by": "code"}
+{"key": "financebench_id_00882", "label": "refusal", "by": "status"}
+{"key": "financebench_id_05915", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01912", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00684", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00302", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00917", "label": "refusal", "by": "status"}
+{"key": "financebench_id_08286", "label": "correct", "by": "code"}
+{"key": "financebench_id_01936", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00685", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00394", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04103", "label": "refusal", "by": "status"}
+{"key": "financebench_id_09724", "label": "correct", "by": "code"}
+{"key": "financebench_id_00705", "label": "correct", "by": "llm", "reason": "The answer states a $400,000,000 increase, matching the gold answer.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer states a $400,000,000 increase, matching the gold answer.\"}"}
+{"key": "financebench_id_01981", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer by confirming that American Express retained card members in 2022.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer matches the gold answer by confirming that American Express retained card members in 2022.\"}"}
+{"key": "financebench_id_00563", "label": "correct", "by": "llm", "reason": "The answer correctly identifies Data Center as the segment with the largest proportional sales increase, matching the gold answer.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly identifies Data Center as the segment with the largest proportional sales increase, matching the gold answer.\"}"}
+{"key": "financebench_id_03882", "label": "correct", "by": "llm", "reason": "The answer matches the gold figure (1,615.9 \u2248 1,616 million USD)", "raw": "{\"label\": \"correct\", \"reason\": \"The answer matches the gold figure (1,615.9 \u2248 1,616 million USD)\"}"}
+{"key": "financebench_id_02119", "label": "correct", "by": "llm", "reason": "The answer provides the same $66.56 per share figure as the gold answer.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer provides the same $66.56 per share figure as the gold answer.\"}"}
+{"key": "financebench_id_01244", "label": "correct", "by": "llm", "reason": "The answer correctly states that CVS paid dividends in Q2 FY2022, matching the gold answer's conclusion.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states that CVS paid dividends in Q2 FY2022, matching the gold answer's conclusion.\"}"}
+{"key": "financebench_id_00080", "label": "incorrect", "by": "llm", "reason": "The answer gives a working capital of $12.416\u202fbn, which does not match the gold answer of $1.6\u202fbn.", "raw": "{\"label\": \"incorrect\", \"reason\": \"The answer gives a working capital of $12.416\u202fbn, which does not match the gold answer of $1.6\u202fbn.\"}"}
+{"key": "financebench_id_00464", "label": "correct", "by": "llm", "reason": "The answer correctly states that Boeing's business is subject to cyclicality due to its reliance on the cyclical airline industry, matching the gold answer.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states that Boeing's business is subject to cyclicality due to its reliance on the cyclical airline industry, matching the gold answer.\"}"}
+{"key": "financebench_id_01091", "label": "correct", "by": "llm", "reason": "The answer confirms Boeing has ongoing legal battles from the Lion Air and Ethiopian crashes, matching the gold answer, and adds extra non-contradictory details.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer confirms Boeing has ongoing legal battles from the Lion Air and Ethiopian crashes, matching the gold answer, and adds extra non-contradictory details.\"}"}
+{"key": "financebench_id_00956", "label": "correct", "by": "llm", "reason": "The answer matches the gold conclusion and cites the same 1.3% sales growth figure, with extra but accurate details.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer matches the gold conclusion and cites the same 1.3% sales growth figure, with extra but accurate details.\"}"}
+{"key": "financebench_id_00799", "label": "correct", "by": "llm", "reason": "The answer correctly states that the quick ratio improved, matching the gold answer's conclusion despite differing numeric details.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states that the quick ratio improved, matching the gold answer's conclusion despite differing numeric details.\"}"}

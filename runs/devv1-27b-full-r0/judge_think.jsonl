@@ -1,0 +1,51 @@
+{"key": "financebench_id_04254", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10420", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02119", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00790", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04302", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00563", "label": "refusal", "by": "status"}
+{"key": "financebench_id_02987", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00799", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04412", "label": "correct", "by": "code"}
+{"key": "financebench_id_01290", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00591", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03031", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00807", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04700", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00669", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00283", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03718", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00822", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04735", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01490", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00678", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00288", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03838", "label": "correct", "by": "code"}
+{"key": "financebench_id_00882", "label": "refusal", "by": "status"}
+{"key": "financebench_id_05915", "label": "refusal", "by": "status"}
+{"key": "financebench_id_01912", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00684", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00302", "label": "refusal", "by": "status"}
+{"key": "financebench_id_03882", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00917", "label": "refusal", "by": "status"}
+{"key": "financebench_id_08286", "label": "correct", "by": "code"}
+{"key": "financebench_id_01936", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00685", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04103", "label": "refusal", "by": "status"}
+{"key": "financebench_id_09724", "label": "correct", "by": "code"}
+{"key": "financebench_id_01981", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00438", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04209", "label": "correct", "by": "code"}
+{"key": "financebench_id_01091", "label": "refusal", "by": "status"}
+{"key": "financebench_id_10136", "label": "correct", "by": "code"}
+{"key": "financebench_id_02049", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00723", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00705", "label": "correct", "by": "llm", "reason": "The answer states a $400,000,000 increase, matching the gold answer.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer states a $400,000,000 increase, matching the gold answer.\"}"}
+{"key": "financebench_id_00394", "label": "correct", "by": "llm", "reason": "The answer correctly identifies Corporate & Investment Bank as the highest\u2011earning segment with net income of $3,725\u202fmillion, matching the gold answer.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly identifies Corporate & Investment Bank as the highest\u2011earning segment with net income of $3,725\u202fmillion, matching the gold answer.\"}"}
+{"key": "financebench_id_01482", "label": "correct", "by": "llm", "reason": "The answer correctly states the proposal was defeated, matching the gold answer's conclusion.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states the proposal was defeated, matching the gold answer's conclusion.\"}"}
+{"key": "financebench_id_01244", "label": "correct", "by": "llm", "reason": "The answer correctly states that CVS paid dividends in Q2 FY2022, matching the gold answer's yes conclusion.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states that CVS paid dividends in Q2 FY2022, matching the gold answer's yes conclusion.\"}"}
+{"key": "financebench_id_00080", "label": "incorrect", "by": "llm", "reason": "The answer gives a working capital of $12.416\u202fbn, which does not match the gold answer of $1.6\u202fbn.", "raw": "{\"label\": \"incorrect\", \"reason\": \"The answer gives a working capital of $12.416\u202fbn, which does not match the gold answer of $1.6\u202fbn.\"}"}
+{"key": "financebench_id_00222", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer's quick ratio of 1.57 and correctly states AMD has a reasonably healthy liquidity profile.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer matches the gold answer's quick ratio of 1.57 and correctly states AMD has a reasonably healthy liquidity profile.\"}"}
+{"key": "financebench_id_00956", "label": "correct", "by": "llm", "reason": "The answer correctly states that JnJ's FY2022 financials are not high growth, citing the 1.3% sales growth and adding consistent additional details.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states that JnJ's FY2022 financials are not high growth, citing the 1.3% sales growth and adding consistent additional details.\"}"}
+{"key": "financebench_id_00464", "label": "correct", "by": "llm", "reason": "The answer correctly states that Boeing's business is subject to cyclicality, matching the gold answer's yes/no conclusion.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states that Boeing's business is subject to cyclicality, matching the gold answer's yes/no conclusion.\"}"}
+{"key": "financebench_id_01254", "label": "correct", "by": "llm", "reason": "The answer correctly states that MGM paid dividends in FY2022, matching the gold answer's yes, and provides a consistent total amount", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states that MGM paid dividends in FY2022, matching the gold answer's yes, and provides a consistent total amount\"}"}

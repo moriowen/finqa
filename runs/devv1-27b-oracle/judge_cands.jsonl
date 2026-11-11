@@ -1,0 +1,16 @@
+{"key": "financebench_id_09724|COCACOLA_2021_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_10136|GENERALMILLS_2022_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_10420|AES_2022_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_04412|LOCKHEEDMARTIN_2020_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_04209|COSTCO_2021_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_03718|LOCKHEEDMARTIN_2022_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_04302|NIKE_2018_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_03838|BLOCK_2020_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_04254|AMERICANWATERWORKS_2021_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_08286|AMAZON_2019_10K", "label": "correct", "by": "code"}
+{"key": "financebench_id_01981|AMERICANEXPRESS_2022_10K", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer by confirming that American Express retained card members in 2022.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer matches the gold answer by confirming that American Express retained card members in 2022.\"}"}
+{"key": "financebench_id_03882|AMCOR_2020_10K", "label": "correct", "by": "llm", "reason": "The answer matches the gold figure of $1,616 million (1,615.9 million is equivalent).", "raw": "{\"label\": \"correct\", \"reason\": \"The answer matches the gold figure of $1,616 million (1,615.9 million is equivalent).\"}"}
+{"key": "financebench_id_02049|JPMORGAN_2023Q2_10Q", "label": "correct", "by": "llm", "reason": "The answer states the risk decreased, matching the gold answer, and provides supporting numbers.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer states the risk decreased, matching the gold answer, and provides supporting numbers.\"}"}
+{"key": "financebench_id_00080|PAYPAL_2022_10K", "label": "incorrect", "by": "llm", "reason": "The answer gives a working capital of $12.416\u202fbn, which does not match the gold answer of $1.6\u202fbn.", "raw": "{\"label\": \"incorrect\", \"reason\": \"The answer gives a working capital of $12.416\u202fbn, which does not match the gold answer of $1.6\u202fbn.\"}"}
+{"key": "financebench_id_00723|AMERICANEXPRESS_2022_10K", "label": "correct", "by": "llm", "reason": "The answer correctly states that operating margin is not a useful metric for American Express, matching the gold answer's conclusion.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer correctly states that operating margin is not a useful metric for American Express, matching the gold answer's conclusion.\"}"}
+{"key": "financebench_id_00222|AMD_2022_10K", "label": "correct", "by": "llm", "reason": "The answer matches the gold answer's quick ratio of 1.57 and correctly states AMD has a reasonably healthy liquidity profile.", "raw": "{\"label\": \"correct\", \"reason\": \"The answer matches the gold answer's quick ratio of 1.57 and correctly states AMD has a reasonably healthy liquidity profile.\"}"}

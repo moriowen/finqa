@@ -67,7 +67,7 @@ CALL2_SYSTEM = """You write the final answer to a financial question. You get ON
 Rules:
 1. Use only the given evidence and the computed result. Do not add numbers that are not in the evidence or the result.
 2. State the computed result exactly as given. Do not recompute it and do not round it differently.
-3. After each claim, cite the IDs of the values that support it, in square brackets, for example [v1, v3].
+3. After each claim, cite the IDs of the values that support it, in square brackets, for example [v1, v3]. Write plain text only, no JSON.
 4. If the question asks for a judgment (for example "is it healthy?"), give a clear yes or no, then the reason, based only on the evidence.
 5. If the status is not_applicable, say that the metric is not meaningful for this company and why, with citations.
 6. Answer in 1 to 4 sentences. Start with the direct answer (the number with its unit, or yes/no, or the name), then give a short reason from the evidence. Never answer with only one word."""
@@ -84,6 +84,11 @@ BARE_SYSTEM = """You are a financial analyst. Answer the question about the SEC 
 VERIFIER_SYSTEM = """You check an answer to a financial question before it is shown to a user. A wrong answer is much worse than no answer.
 
 You get the question, the filing information, the evidence values (each with the page, the quote, the column and the period that the extractor reported), the computation, the final answer, and IMAGES of the cited pages. The images are the ground truth.
+
+Important:
+- "page N" means the N-th page of the PDF file. It is NOT the page number printed on the page. Ignore printed page numbers completely; never reject because of them.
+- Code already checked that every quote exists, character by character, in the text of its page. A quote may contain only the row label and the one value that was used. Do not reject a quote for leaving out other columns.
+- Your job is to check what code cannot: that each value is in the column of the right period, the right scale, that the formula is a correct definition of what the question asks, and that the answer follows from the evidence.
 
 Check:
 - period_ok: each value comes from the period that the question asks for (map column dates to fiscal periods with the filing information). True if not relevant.

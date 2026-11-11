@@ -150,10 +150,11 @@ async def run_full(cl, q, doc: str, pages: list[int], ranked: list[int], *, glos
             [llm.image_part(parse.render_png(doc, p, dpi=90)) for p in shown[:8]]
     checked, out1 = None, None
     for attempt in range(2):
-        r = await llm.chat(cl, msgs, schema=prompts.CALL1_SCHEMA, max_tokens=3000)
+        r = await llm.chat(cl, msgs, schema=prompts.CALL1_SCHEMA, max_tokens=4000)
         out1 = r.get("json") or {}
         errs, checked = check_call1(out1, doc, shown, q.question) if out1 else (["output was not valid JSON"], None)
-        rec["attempts"].append({"call": 1, "out": out1, "errors": errs, "usage": r["usage"], "seconds": r["seconds"]})
+        rec["attempts"].append({"call": 1, "out": out1, "errors": errs, "usage": r["usage"], "seconds": r["seconds"],
+                                "finish": r.get("finish"), "text_tail": r["text"][-300:] if r.get("finish") == "length" else ""})
         if not errs:
             break
         if attempt == 0:
@@ -177,23 +178,26 @@ async def run_full(cl, q, doc: str, pages: list[int], ranked: list[int], *, glos
                                       f"PAGES OF THE QUOTES:\n{ctx}\n\nQUESTION: {q.question}"}]
     ids = {v["id"] for v in checked["values"]}
     for attempt in range(2):
-        r = await llm.chat(cl, m2, schema=prompts.CALL2_SCHEMA, max_tokens=800)
-        out2 = r.get("json") or {}
-        ans = out2.get("answer", "")
-        cites = [c for c in out2.get("citations", []) if c in ids] or sorted(set(re.findall(r"v\d+", ans)) & ids)
+        # plain text, not JSON: in JSON mode the 27B model often ran into the token limit (dev run, 37 of 70 calls)
+        r = await llm.chat(cl, m2, max_tokens=700)
+        ans = llm.strip_think(r["text"]).strip()
+        cites = sorted(set(re.findall(r"v\d+", ans)) & ids, key=lambda x: int(x[1:]))
         bad = checks.number_check(ans, checked["values"], checked["result"], checked["shown"]) if ans else ["(empty)"]
         errs2 = []
+        if r.get("finish") == "length":
+            errs2.append("the answer was cut off: write 1 to 4 sentences")
         if bad:
             errs2.append(f"numbers not in the evidence or the result: {', '.join(bad[:5])}")
         if not cites:
-            errs2.append("no citation of a value ID")
-        rec["attempts"].append({"call": 2, "out": out2, "errors": errs2, "usage": r["usage"], "seconds": r["seconds"]})
+            errs2.append("no citation of a value ID such as [v1]")
+        rec["attempts"].append({"call": 2, "out": {"answer": ans, "citations": cites}, "errors": errs2,
+                                "usage": r["usage"], "seconds": r["seconds"]})
         if not errs2:
             break
         if attempt == 0:
             m2 = m2 + [{"role": "assistant", "content": r["text"]},
                        {"role": "user", "content": "Your answer failed these checks:\n- " + "\n- ".join(errs2) +
-                        "\nUse only numbers from the evidence and the computed result, and cite value IDs."}]
+                        "\nUse only numbers from the evidence and the computed result, and cite value IDs like [v1]."}]
     if errs2:
         rec.update(status="NOT_FOUND", reason="number check (G4) failed twice: " + "; ".join(errs2))
         return rec
