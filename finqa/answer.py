@@ -66,9 +66,9 @@ def check_call1(out: dict, doc: str, shown: list[int], question: str = "") -> tu
         v = dict(v)
         orig = v.get("name", f"value_{i}")
         v["name"] = _ident(orig)
-        originals[orig] = v["name"]
-        if v["name"] in seen:
-            errs.append(f"value name '{v['name']}' is used twice")
+        if v["name"] in seen:  # repeated name: keep the value under a new name; the formula uses the first one
+            v["name"] = f"{v['name']}_{i}"
+        originals.setdefault(orig, v["name"])
         seen.add(v["name"])
         p = v.get("page", 0) - 1
         if p not in shown:

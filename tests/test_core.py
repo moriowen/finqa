@@ -80,3 +80,8 @@ def test_quote_label_plus_one_column():
 
 def test_number_check_skips_dates():
     assert number_check("As of December 31, 2022 the ratio was 1.2 [v1].", [{"raw": "1.2", "scale": "units"}], 1.2, 1.2) == []
+
+
+def test_number_check_allows_numbers_from_quotes_and_page_refs():
+    vals = [{"raw": "$4,200,000,000", "scale": "units", "quote": "2023 364 Day Credit Agreement $4,200,000,000"}]
+    assert number_check("Up to $4,200,000,000 under the 364 Day Credit Agreement, page 52 [v1].", vals, 4.2e9, 4.2e9) == []

@@ -73,6 +73,7 @@ def numbers_in_text(text: str) -> list[tuple[float, int, str]]:
     t = re.sub(r"\b(10-?K|10-?Q|8-?K)\b", " ", t, flags=re.I)
     t = re.sub(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2}(,\s*\d{4})?", " ", t)
     t = re.sub(r"\[v\d+(?:\s*,\s*v\d+)*\]", " ", t)           # quote-ID citations
+    t = re.sub(r"\b(pages?|notes?|item|items|part|section|exhibit)\s+\d+[a-z]?(\s*(and|,|-|to)\s*\d+)*", " ", t, flags=re.I)
     for m in _NUM.finditer(t):
         tok = m.group(0).strip()
         core = re.sub(r"[^\d.]", "", tok)
@@ -89,6 +90,9 @@ def numbers_in_text(text: str) -> list[tuple[float, int, str]]:
 def allowed_numbers(values: list[dict], result: float | None, shown: float | None) -> list[float]:
     """Every number the answer may contain: each value in every scale, the result, the shown result."""
     allowed = []
+    for v in values:  # numbers inside a checked quote have a source too (e.g. 'Flight 610', a vote count)
+        for n, _, _ in numbers_in_text(v.get("quote", "")):
+            allowed.append(abs(n))
     for v in values:
         x = parse_raw(v.get("raw", ""))
         if x is None:

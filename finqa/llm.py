@@ -10,7 +10,7 @@ import os
 import re
 import time
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, BadRequestError
 
 BASE_URL = os.environ.get("FINQA_BASE_URL", "http://localhost:8000/v1")
 MODEL = os.environ.get("FINQA_MODEL", "")
@@ -53,8 +53,16 @@ async def chat(cl: AsyncOpenAI, messages: list[dict], *, schema: dict | None = N
     if reasoning_effort is not None:
         kw["reasoning_effort"] = reasoning_effort
     t0 = time.time()
-    r = await cl.chat.completions.create(model=model or MODEL, messages=messages, temperature=0, max_tokens=max_tokens,
-                                         extra_body=extra, **kw)
+    try:
+        r = await cl.chat.completions.create(model=model or MODEL, messages=messages, temperature=0,
+                                             max_tokens=max_tokens, extra_body=extra, **kw)
+    except BadRequestError:
+        if schema is None:
+            raise
+        # fallback: a decoder that rejects length limits in the schema gets the schema without them
+        kw["response_format"]["json_schema"]["schema"] = _strip_limits(schema)
+        r = await cl.chat.completions.create(model=model or MODEL, messages=messages, temperature=0,
+                                             max_tokens=max_tokens, extra_body=extra, **kw)
     text = r.choices[0].message.content or ""
     out = {"text": text, "usage": r.usage.model_dump() if r.usage else None, "seconds": round(time.time() - t0, 2),
            "finish": r.choices[0].finish_reason}
@@ -65,6 +73,14 @@ async def chat(cl: AsyncOpenAI, messages: list[dict], *, schema: dict | None = N
             out["json"] = None
             out["error"] = f"bad JSON: {e}"
     return out
+
+
+def _strip_limits(schema):
+    if isinstance(schema, dict):
+        return {k: _strip_limits(v) for k, v in schema.items() if k not in ("maxItems", "maxLength", "minItems")}
+    if isinstance(schema, list):
+        return [_strip_limits(x) for x in schema]
+    return schema
 
 
 async def gather_limited(coros, limit: int = 16):

@@ -20,7 +20,7 @@ Your task in this step: find the evidence, and write a formula. Do not compute a
 
 Rules:
 1. Use only the given pages. Do not use your own knowledge of the company's numbers.
-2. For every value you use, copy the "quote" EXACTLY from the page: the row label and the number as printed, from one line of the page. Do not shorten numbers, do not change signs, do not reformat.
+2. Give only the values that the answer needs, at most 12. For every value you use, copy the "quote" EXACTLY from the page: the row label and the number as printed, from one line of the page. Do not shorten numbers, do not change signs, do not reformat.
 3. "raw" is the value exactly as printed in that line, for example "(1,577)" or "$5,363" or "24.2%". For a non-numeric fact (a name, a date, a segment), raw is that text.
 4. "scale" is the unit of the table, usually stated in a caption such as "(In millions)". Use "units" for per-share data, percentages, counts and text.
 5. "period" is the fiscal period of the column you read, for example "FY2018" or "Q2 FY2024". "column_header" is the header text of that column as printed, for example "2018" or "July 29, 2023". Companies whose fiscal year does not end in December label columns with dates: map them to the fiscal period with the filing information given.
@@ -39,16 +39,16 @@ CALL1_SCHEMA = {
     "type": "object",
     "properties": {
         "status": {"type": "string", "enum": ["found", "not_applicable", "not_found"]},
-        "values": {"type": "array", "items": {
+        "values": {"type": "array", "maxItems": 12, "items": {
             "type": "object",
             "properties": {
-                "name": {"type": "string"},
-                "raw": {"type": "string"},
+                "name": {"type": "string", "maxLength": 64},
+                "raw": {"type": "string", "maxLength": 200},
                 "scale": {"type": "string", "enum": SCALE_ENUM},
                 "period": {"type": "string"},
                 "column_header": {"type": "string"},
                 "page": {"type": "integer"},
-                "quote": {"type": "string"},
+                "quote": {"type": "string", "maxLength": 400},
             },
             "required": ["name", "raw", "scale", "period", "column_header", "page", "quote"],
             "additionalProperties": False}},
