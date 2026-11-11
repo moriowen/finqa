@@ -23,7 +23,7 @@ def test_formula_cagr_uses_periods():
     assert abs(r - 0.1) < 1e-9
 
 
-@pytest.mark.parametrize("f", ["cash * 100", "__import__('os')", "cash ** rec", "max(cash, rec)",
+@pytest.mark.parametrize("f", ["cash * 100", "__import__('os')", "cash ** rec", "round(cash, rec)",
                                "cash.real", "unknown + cash", "[cash]"])
 def test_formula_rejects(f):
     with pytest.raises(FormulaError):
@@ -60,3 +60,23 @@ def test_number_check():
     assert number_check("Capex was $1.58 billion.", vals, -1577e6, 1577.0) == []
     assert number_check("Capex was $1,700 million.", vals, -1577e6, 1577.0) == ["$1,700"]
     assert number_check("It has two segments.", [], None, None) == []
+
+
+def test_constants_only_from_question():
+    from finqa.formula import question_constants
+    c = question_constants("DPO = 365 * average payables / COGS for FY2022")
+    assert c == {365.0}
+    assert evaluate("365 * cash / rec", {"cash": 1.0, "rec": 2.0}, {}, c) == 182.5
+    with pytest.raises(FormulaError):
+        evaluate("100 * cash", {"cash": 1.0}, {}, c)
+    assert evaluate("max(cash, rec)", {"cash": 1.0, "rec": 2.0}, {}) == 2.0
+
+
+def test_quote_label_plus_one_column():
+    page = "Total net revenue                 9,497,578           4,713,500           3,298,177"
+    assert quote_on_page("Total net revenue | 4,713,500", [page])
+    assert not quote_on_page("Total net revenue | 4,713,501", [page])
+
+
+def test_number_check_skips_dates():
+    assert number_check("As of December 31, 2022 the ratio was 1.2 [v1].", [{"raw": "1.2", "scale": "units"}], 1.2, 1.2) == []

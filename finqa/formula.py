@@ -9,7 +9,7 @@ import math
 import re
 
 SCALES = {"units": 1.0, "thousands": 1e3, "millions": 1e6, "billions": 1e9}
-FUNCS = {"avg", "sum", "cagr", "abs"}
+FUNCS = {"avg", "sum", "cagr", "abs", "max", "min"}
 
 
 class FormulaError(ValueError):
@@ -47,7 +47,7 @@ def _year(period: str | None) -> float | None:
     return y + (int(q.group(1)) - 1) / 4 if q else float(y)
 
 
-def check_formula(formula: str, names: set[str]) -> ast.Expression:
+def check_formula(formula: str, names: set[str], constants: set[float] = frozenset()) -> ast.Expression:
     try:
         tree = ast.parse(formula.strip(), mode="eval")
     except SyntaxError as e:
@@ -61,7 +61,7 @@ def check_formula(formula: str, names: set[str]) -> ast.Expression:
             continue
         if isinstance(node, ast.Call):
             if not (isinstance(node.func, ast.Name) and node.func.id in FUNCS) or node.keywords:
-                raise FormulaError("only avg, sum, cagr, abs are allowed as functions")
+                raise FormulaError("only avg, sum, cagr, abs, max, min are allowed as functions")
             continue
         if isinstance(node, ast.Name):
             if node.id in FUNCS:
@@ -70,19 +70,25 @@ def check_formula(formula: str, names: set[str]) -> ast.Expression:
                 raise FormulaError(f"unknown value name '{node.id}' (names: {sorted(names)})")
             continue
         if isinstance(node, ast.Constant):
-            raise FormulaError(f"numeric constant {node.value!r} is not allowed: use only value names")
+            if isinstance(node.value, (int, float)) and float(node.value) in constants:
+                continue  # the question itself states this constant (for example 365 days)
+            raise FormulaError(f"numeric constant {node.value!r} is not allowed: use only value names "
+                               "(a constant is allowed only if the question states it)")
         raise FormulaError(f"'{type(node).__name__}' is not allowed in a formula")
     return tree
 
 
-def evaluate(formula: str, values: dict[str, float], periods: dict[str, str | None]) -> float:
-    tree = check_formula(formula, set(values))
+def evaluate(formula: str, values: dict[str, float], periods: dict[str, str | None],
+             constants: set[float] = frozenset()) -> float:
+    tree = check_formula(formula, set(values), constants)
 
     def ev(n):
         if isinstance(n, ast.Expression):
             return ev(n.body)
         if isinstance(n, ast.Name):
             return values[n.id]
+        if isinstance(n, ast.Constant):
+            return float(n.value)
         if isinstance(n, ast.UnaryOp):
             v = ev(n.operand)
             return -v if isinstance(n.op, ast.USub) else v
@@ -106,6 +112,10 @@ def evaluate(formula: str, values: dict[str, float], periods: dict[str, str | No
                 return sum(args) / len(args)
             if f == "sum":
                 return sum(args)
+            if f == "max":
+                return max(args)
+            if f == "min":
+                return min(args)
             if f == "abs":
                 if len(args) != 1:
                     raise FormulaError("abs takes one argument")
@@ -126,6 +136,16 @@ def evaluate(formula: str, values: dict[str, float], periods: dict[str, str | No
     if not math.isfinite(r):
         raise FormulaError("result is not finite")
     return r
+
+
+def question_constants(question: str) -> set[float]:
+    """Numbers that the question text itself states, e.g. '365' in a days-based definition. Years are excluded."""
+    out = set()
+    for m in re.finditer(r"(?<![\w.])\d+(?:\.\d+)?(?![\w.])", question):
+        v = float(m.group(0))
+        if not (1990 <= v <= 2035):
+            out.add(v)
+    return out
 
 
 def present(result: float, display: str, out_scale: str, rounding: int | None) -> tuple[float, str]:

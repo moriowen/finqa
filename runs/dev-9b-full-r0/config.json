@@ -1,0 +1,13 @@
+{
+ "run": "dev-9b-full-r0",
+ "set": "dev",
+ "mode": "full",
+ "arm": "r0",
+ "path": "A",
+ "unans": false,
+ "glossary": false,
+ "images": false,
+ "budget": 12,
+ "limit": 24,
+ "model": "Qwen/Qwen3.5-9B"
+}

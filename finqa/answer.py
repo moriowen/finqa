@@ -11,7 +11,7 @@ import re
 
 from . import checks, llm, parse, prompts, retrieve
 from .corpus import filings
-from .formula import FormulaError, SCALES, evaluate, parse_raw, present
+from .formula import FormulaError, SCALES, evaluate, parse_raw, present, question_constants
 
 MAX_CHARS = 48_000      # about 12K tokens of page text
 PAGE_CHARS = 9_000
@@ -46,15 +46,27 @@ def _ident(s: str) -> str:
     return s if s and not s[0].isdigit() else "v_" + s
 
 
-def check_call1(out: dict, doc: str, shown: list[int]) -> tuple[list[str], dict]:
+def rewrite_formula(formula: str, originals: dict[str, str]) -> str:
+    """The model sometimes writes the original names (row labels) in the formula. Map them to the identifiers."""
+    f = formula
+    for orig in sorted(originals, key=len, reverse=True):
+        if orig and orig != originals[orig] and orig in f:
+            f = f.replace(orig, originals[orig])
+    return f
+
+
+def check_call1(out: dict, doc: str, shown: list[int], question: str = "") -> tuple[list[str], dict]:
     """G3 + G5. Returns (errors, checked) where checked has values with ids, result, shown text."""
     errs = []
     d = parse.load(doc)
     vals = []
     seen = set()
+    originals = {}
     for i, v in enumerate(out.get("values") or [], 1):
         v = dict(v)
-        v["name"] = _ident(v.get("name", f"value_{i}"))
+        orig = v.get("name", f"value_{i}")
+        v["name"] = _ident(orig)
+        originals[orig] = v["name"]
         if v["name"] in seen:
             errs.append(f"value name '{v['name']}' is used twice")
         seen.add(v["name"])
@@ -79,13 +91,13 @@ def check_call1(out: dict, doc: str, shown: list[int]) -> tuple[list[str], dict]
     if not vals:
         errs.append("no value passed the checks; give exact quotes, or answer not_found")
         return errs, checked
-    formula = (out.get("formula") or "").strip()
+    formula = rewrite_formula((out.get("formula") or "").strip(), originals)
     display = out.get("display", "number")
     if formula and display != "text":
         nums = {v["name"]: v["number"] * SCALES.get(v["scale"], 1.0) for v in vals if v["number"] is not None}
         pers = {v["name"]: v.get("period") for v in vals}
         try:
-            r = evaluate(formula, nums, pers)
+            r = evaluate(formula, nums, pers, question_constants(question))
             rnd = out.get("rounding", -1)
             shown_v, shown_t = present(r, display, out.get("out_scale", "units"), None if rnd is None or rnd < 0 else rnd)
             checked.update(result=r, shown=shown_v, shown_text=shown_t, formula=formula)
@@ -128,8 +140,9 @@ def passage(doc: str, page: int, quote: str, raw: str) -> str:
 
 
 async def run_full(cl, q, doc: str, pages: list[int], ranked: list[int], *, glossary: bool = False,
-                   use_images: bool = False) -> dict:
-    page_txt, shown = page_block(doc, pages, [p for p in ranked if p in pages])
+                   use_images: bool = False, pack: list[int] | None = None) -> dict:
+    # only search extras may be dropped when the text is too long, never the statement pack
+    page_txt, shown = page_block(doc, pages, [p for p in ranked if p in pages and p not in (pack or [])])
     rec = {"qid": q.id, "doc": doc, "pages_shown": [p + 1 for p in shown], "attempts": []}
     msgs = call1_messages(q.question, doc, page_txt, glossary)
     if use_images:  # A12 experiment: page images instead of only text
@@ -139,7 +152,7 @@ async def run_full(cl, q, doc: str, pages: list[int], ranked: list[int], *, glos
     for attempt in range(2):
         r = await llm.chat(cl, msgs, schema=prompts.CALL1_SCHEMA, max_tokens=3000)
         out1 = r.get("json") or {}
-        errs, checked = check_call1(out1, doc, shown) if out1 else (["output was not valid JSON"], None)
+        errs, checked = check_call1(out1, doc, shown, q.question) if out1 else (["output was not valid JSON"], None)
         rec["attempts"].append({"call": 1, "out": out1, "errors": errs, "usage": r["usage"], "seconds": r["seconds"]})
         if not errs:
             break
@@ -192,8 +205,8 @@ async def run_full(cl, q, doc: str, pages: list[int], ranked: list[int], *, glos
     return rec
 
 
-async def run_bare(cl, q, doc: str, pages: list[int], ranked: list[int]) -> dict:
-    page_txt, shown = page_block(doc, pages, [p for p in ranked if p in pages])
+async def run_bare(cl, q, doc: str, pages: list[int], ranked: list[int], pack: list[int] | None = None) -> dict:
+    page_txt, shown = page_block(doc, pages, [p for p in ranked if p in pages and p not in (pack or [])])
     r = await llm.chat(cl, [{"role": "system", "content": prompts.BARE_SYSTEM},
                             {"role": "user", "content": f"FILING: {filing_info(doc)}\n\nPAGES:\n{page_txt}\n\nQUESTION: {q.question}"}],
                        max_tokens=800)

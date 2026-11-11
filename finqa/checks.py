@@ -21,6 +21,8 @@ def quote_on_page(quote: str, page_texts: list[str]) -> bool:
     parts = [norm(p) for p in re.split(r"\.\.\.|…", q) if len(norm(p)) >= 4]
     if not parts:
         return False
+    if _parts_on_one_line(q, page_texts):
+        return True
     for h in hay:
         pos, ok = 0, True
         for p in parts:
@@ -31,6 +33,28 @@ def quote_on_page(quote: str, page_texts: list[str]) -> bool:
             pos = i + len(p)
         if ok:
             return True
+    return False
+
+
+def _parts_on_one_line(quote: str, page_texts: list[str]) -> bool:
+    """A quote like 'Total net revenue | 4,713,500' passes if each part is on the same page line, in order.
+    The model often quotes the row label and the one column it used, and skips the other columns."""
+    parts = [norm(p) for p in re.split(r"\||\.\.\.|…", quote) if norm(p)]
+    if len(parts) < 2:
+        return False
+    for t in page_texts:
+        lines = t.splitlines()
+        for i in range(len(lines)):
+            h = norm(" ".join(lines[i:i + 2]))   # a row label can wrap onto the next line
+            pos, ok = 0, True
+            for p in parts:
+                j = h.find(p, pos)
+                if j < 0:
+                    ok = False
+                    break
+                pos = j + len(p)
+            if ok:
+                return True
     return False
 
 
@@ -47,6 +71,7 @@ def numbers_in_text(text: str) -> list[tuple[float, int, str]]:
     out = []
     t = re.sub(r"\b(FY|Q[1-4]|H[12])\s?'?\d{2,4}\b", " ", text, flags=re.I)
     t = re.sub(r"\b(10-?K|10-?Q|8-?K)\b", " ", t, flags=re.I)
+    t = re.sub(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2}(,\s*\d{4})?", " ", t)
     t = re.sub(r"\[v\d+(?:\s*,\s*v\d+)*\]", " ", t)           # quote-ID citations
     for m in _NUM.finditer(t):
         tok = m.group(0).strip()

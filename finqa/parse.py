@@ -19,12 +19,12 @@ from . import paths
 
 # A13 v2 statement-page detector: whitespace removed, short title line in the first 6 lines, table-heavy page.
 _STMT = re.compile(
-    r"^(condensed)?(consolidated)?(condensed)?("
+    r"(condensed)?(consolidated)?(condensed)?("
     r"(?P<bs>balancesheets?|statements?of(financialposition|financialcondition))"
-    r"|(?P<cf>statements?ofcashflows?)"
+    r"|(?P<cf>statements?ofcashflows?|cashflows?statements?)"
     r"|(?P<ci>statements?ofcomprehensive(income|loss|earnings))"
     r"|(?P<eq>statements?of(changesin)?(shareholders|stockholders|shareowners)?.{0,12}equity|(shareholders|stockholders).{0,3}equity)"
-    r"|(?P<is>statements?of(consolidated)?(income|operations|earnings)))")
+    r"|(?P<is>statements?of(consolidated)?(income|operations|earnings)|incomestatements?))")
 
 
 def statement_type(text: str) -> str | None:
@@ -32,7 +32,10 @@ def statement_type(text: str) -> str | None:
     for l in lines:
         if len(l) >= 90:
             continue
-        m = _STMT.search(re.sub(r"\s+", "", l).lower())
+        t = re.sub(r"\s+", "", l).lower()
+        m = _STMT.search(t)
+        if m and (m.start() > 40 or "notesto" in t or "see" in t[:m.start()]):
+            m = None  # a sentence or a note that mentions a statement, not its title
         if m:
             toks = text.split()
             num = sum(any(c.isdigit() for c in t) for t in toks) / max(len(toks), 1)
@@ -75,7 +78,8 @@ def load(doc: str) -> dict:
         _parse_and_save(doc)
     with gzip.open(p, "rt") as f:
         d = json.load(f)
-    d["statements"] = {int(k): v for k, v in d["statements"].items()}
+    # recomputed from the text, so detector fixes apply without re-parsing the PDFs
+    d["statements"] = {i: t for i, t in enumerate(statement_type(p) for p in d["plain"]) if t}
     return d
 
 

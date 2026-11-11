@@ -25,8 +25,8 @@ Rules:
 4. "scale" is the unit of the table, usually stated in a caption such as "(In millions)". Use "units" for per-share data, percentages, counts and text.
 5. "period" is the fiscal period of the column you read, for example "FY2018" or "Q2 FY2024". "column_header" is the header text of that column as printed, for example "2018" or "July 29, 2023". Companies whose fiscal year does not end in December label columns with dates: map them to the fiscal period with the filing information given.
 6. "name" is a short identifier: lowercase letters, digits and underscores, for example capex_2018.
-7. "formula" uses ONLY value names, + - * /, parentheses, and the functions avg(...), sum(...), abs(x), cagr(first, last). Never write a number in the formula. For a question that asks for one value, the formula is that value's name. For a text answer, leave the formula empty.
-8. "display": "percent" if the answer is a percentage or margin (write the formula as a fraction; the system multiplies by 100), "number" for amounts and ratios, "text" for non-numeric answers.
+7. "formula" uses ONLY the "name" identifiers of your values (exactly as written in the name fields, never row labels), + - * /, parentheses, and the functions avg(...), sum(...), abs(x), max(...), min(...), cagr(first, last). Never write a number in the formula, except a constant that the question itself states (for example 365 if the question defines a days-based metric with 365). For an average of two years use avg(a, b). For a question that asks for one value, the formula is that value's name. For a text answer, leave the formula empty.
+8. "display": "percent" ONLY if the question asks for a percentage, a margin or a growth rate (write the formula as a fraction; the system multiplies by 100). Use "number" for amounts and for ratios such as a quick ratio, a current ratio or a turnover (these are not percentages). Use "text" for non-numeric answers.
 9. "out_scale": the unit the question asks for (for example "USD millions" -> millions). Use "units" for ratios and per-share values.
 10. "rounding": the number of decimal places that the question asks for, or -1 if it does not say.
 11. "status":
@@ -70,7 +70,7 @@ Rules:
 3. After each claim, cite the IDs of the values that support it, in square brackets, for example [v1, v3].
 4. If the question asks for a judgment (for example "is it healthy?"), give a clear yes or no, then the reason, based only on the evidence.
 5. If the status is not_applicable, say that the metric is not meaningful for this company and why, with citations.
-6. Answer in 1 to 4 sentences."""
+6. Answer in 1 to 4 sentences. Start with the direct answer (the number with its unit, or yes/no, or the name), then give a short reason from the evidence. Never answer with only one word."""
 
 CALL2_SCHEMA = {
     "type": "object",

@@ -109,14 +109,14 @@ def cmd_pass1(a):
 
     async def go(q, d):
         if a.mode == "oracle":
-            pages, ranked = oracle[q.id], []
+            pages, ranked, pack = oracle[q.id], [], []
         else:
             sel = retrieve.select_pages(d, q.question, arm=a.arm, plan=plans.get(q.id), budget=a.budget)
-            pages, ranked = sel["pages"], sel["ranked"]
+            pages, ranked, pack = sel["pages"], sel["ranked"], sel["pack"]
         if a.mode == "bare":
-            rec = await answer.run_bare(cl, q, d, pages, ranked)
+            rec = await answer.run_bare(cl, q, d, pages, ranked, pack)
         else:
-            rec = await answer.run_full(cl, q, d, pages, ranked, glossary=a.glossary, use_images=a.images)
+            rec = await answer.run_full(cl, q, d, pages, ranked, glossary=a.glossary, use_images=a.images, pack=pack)
         rec.update(key=f"{q.id}|{d}", question=q.question)
         return rec
     todo = [(q, d) for q, d in items if f"{q.id}|{d}" not in done]
