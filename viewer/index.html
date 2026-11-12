@@ -58,7 +58,7 @@
 <body>
 <header>
   <h1>FinanceBench QA with provenance</h1>
-  <p>Answers questions about SEC filings and shows the page and quote behind every answer. If it cannot check the evidence, it does not answer.</p>
+  <p>A comparison of Qwen3.5 2B, 9B and 27B on FinanceBench, with and without a checking pipeline. Every answer shows the page and quote behind it. When the evidence cannot be checked, the pipeline refuses.</p>
   <nav><button data-tab="try" class="on">Try a question</button><button data-tab="browse">Browse all 150 answers</button><button data-tab="flow">How the system works</button></nav>
 </header>
 
@@ -84,6 +84,8 @@
 <section id="flow" class="flow">
   <p class="muted">Every stage, the technology it uses, and the decision behind it. Red marks where the system refuses instead of guessing.</p>
   <img src="system-flow.svg" alt="System flow: index, route, retrieve, extract, check, answer, verify, combine, output">
+  <p class="muted" style="margin-top:28px">Inside the harness: the data at each step, the rule each check enforces, and where a failure goes. G3, G4 and G5 are Python code, not model calls.</p>
+  <img src="harness-detail.svg" alt="Harness data flow with checks, retries and refusals">
 </section>
 
 <div id="overlay"><img alt=""></div>

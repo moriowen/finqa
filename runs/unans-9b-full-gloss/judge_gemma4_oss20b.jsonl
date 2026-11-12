@@ -1,7 +1,6 @@
 {"key": "financebench_id_00603__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01226__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00394__shiftyear", "label": "refusal", "by": "status"}
-{"key": "financebench_id_00799__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_01491__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_02981__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_04171__shiftyear", "label": "refusal", "by": "status"}
@@ -167,7 +166,6 @@
 {"key": "financebench_id_04672__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_09724__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00215__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_00720__shiftyear", "label": "answer", "by": "status"}
 {"key": "financebench_id_00540__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01028__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01474__shiftyear", "label": "refusal", "by": "status"}
@@ -288,3 +286,5 @@
 {"key": "financebench_id_02608__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_04103__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_05915__wrongdoc", "label": "refusal", "by": "status"}
+{"key": "financebench_id_00799__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_00720__shiftyear", "label": "refusal", "by": "llm"}

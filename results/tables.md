@@ -2,36 +2,36 @@
 
 | Model | Setting | Correct | Wrong | Refused | Wrong-answer rate [95% CI] | Coverage | Selective accuracy | Page hit | Test only (99): wrong / correct |
 |---|---|---|---|---|---|---|---|---|---|
-| Qwen3.5-27B (FP8) | bare | 100 | 49 | 1 | 33% [25 to 40] | 99% | 67% | n/a | 32% / 67% |
-| Qwen3.5-27B (FP8) | full | 76 | 24 | 50 | 16% [10 to 22] | 67% | 76% | 85% | 14% / 51% |
-| Qwen3.5-27B (FP8) | oracle | 89 | 16 | 45 | 11% [6 to 15] | 70% | 85% | 100% | 10% / 57% |
-| Qwen3.5-9B | bare | 91 | 59 | 0 | 39% [31 to 47] | 100% | 61% | n/a | 38% / 62% |
-| Qwen3.5-9B | full | 71 | 17 | 62 | 11% [7 to 17] | 59% | 81% | 84% | 12% / 45% |
-| Qwen3.5-9B | full-gloss | 61 | 17 | 72 | 11% [7 to 17] | 52% | 78% | 86% | 13% / 39% |
-| Qwen3.5-9B | oracle | 71 | 19 | 60 | 13% [7 to 19] | 60% | 79% | 100% | 13% / 48% |
-| Qwen3.5-2B | bare | 73 | 76 | 1 | 51% [43 to 59] | 99% | 49% | n/a | 48% / 51% |
+| Qwen3.5-27B (FP8) | bare | 101 | 48 | 1 | 32% [25 to 39] | 99% | 68% | n/a | 31% / 68% |
+| Qwen3.5-27B (FP8) | full | 80 | 20 | 50 | 13% [8 to 19] | 67% | 80% | 85% | 10% / 55% |
+| Qwen3.5-27B (FP8) | oracle | 92 | 13 | 45 | 9% [5 to 13] | 70% | 88% | 100% | 7% / 60% |
+| Qwen3.5-9B | bare | 93 | 57 | 0 | 38% [30 to 45] | 100% | 62% | n/a | 36% / 64% |
+| Qwen3.5-9B | full | 72 | 16 | 62 | 11% [6 to 16] | 59% | 82% | 84% | 11% / 46% |
+| Qwen3.5-9B | full-gloss | 62 | 16 | 72 | 11% [6 to 16] | 52% | 79% | 86% | 12% / 40% |
+| Qwen3.5-9B | oracle | 73 | 17 | 60 | 11% [7 to 17] | 60% | 81% | 100% | 11% / 51% |
+| Qwen3.5-2B | bare | 77 | 72 | 1 | 48% [39 to 56] | 99% | 52% | n/a | 44% / 55% |
 | Qwen3.5-2B | full | 12 | 2 | 136 | 1% [0 to 3] | 9% | 86% | 79% | 1% / 7% |
 | Qwen3.5-2B | full-gloss | 12 | 0 | 138 | 0% [0 to 0] | 8% | 100% | 83% | 0% / 8% |
-| Qwen3.5-2B | oracle | 14 | 5 | 131 | 3% [1 to 7] | 13% | 74% | 100% | 4% / 8% |
+| Qwen3.5-2B | oracle | 15 | 4 | 131 | 3% [1 to 5] | 13% | 79% | 100% | 3% / 9% |
 
 ### Questions with no answer in the filing (E6, 290 per model)
 
 | Model | Setting | False answers | Wrong filing | Shifted year |
 |---|---|---|---|---|
 | Qwen3.5-27B (FP8) | bare | 22/290 (8%) | 7% | 9% |
-| Qwen3.5-27B (FP8) | full | 12/290 (4%) | 7% | 1% |
+| Qwen3.5-27B (FP8) | full | 1/290 (0%) | 0% | 1% |
 | Qwen3.5-9B | bare | 20/290 (7%) | 5% | 9% |
-| Qwen3.5-9B | full | 1/290 (0%) | 0% | 1% |
-| Qwen3.5-9B | full-gloss | 2/290 (1%) | 1% | 1% |
+| Qwen3.5-9B | full | 0/290 (0%) | 0% | 0% |
+| Qwen3.5-9B | full-gloss | 0/290 (0%) | 0% | 0% |
 | Qwen3.5-2B | bare | 53/290 (18%) | 17% | 20% |
 | Qwen3.5-2B | full | 0/290 (0%) | 0% | 0% |
-| Qwen3.5-2B | full-gloss | 2/290 (1%) | 1% | 0% |
+| Qwen3.5-2B | full-gloss | 0/290 (0%) | 0% | 0% |
 
 ### Path B: no filing given (27B, full harness)
 
 | Correct | Wrong | Refused | Wrong-answer rate | Coverage |
 |---|---|---|---|---|
-| 72 | 20 | 58 | 13% | 61% |
+| 76 | 16 | 58 | 11% | 61% |
 
 ### FinanceBench paper baselines (human labels, same 150 questions)
 
@@ -50,15 +50,15 @@
 
 | Run | Checked | Accepted correct | Accepted wrong (leaks) | Rejected correct (lost) | Rejected wrong (caught) |
 |---|---|---|---|---|---|
-| all-9b-full | 97 | 70 | 18 | 1 | 8 |
-| all-27b-full | 106 | 79 | 22 | 1 | 4 |
-| all-27b-oracle | 119 | 88 | 19 | 5 | 7 |
-| pathb-27b-full | 165 | 119 | 35 | 1 | 10 |
-| all-9b-full-gloss | 85 | 61 | 17 | 1 | 6 |
-| all-9b-oracle | 96 | 72 | 18 | 2 | 4 |
+| all-9b-full | 97 | 70 | 18 | 2 | 7 |
+| all-27b-full | 106 | 82 | 19 | 1 | 4 |
 | all-2b-full | 18 | 12 | 2 | 1 | 3 |
+| pathb-27b-full | 165 | 127 | 27 | 1 | 10 |
+| all-27b-oracle | 119 | 92 | 15 | 5 | 7 |
+| all-9b-full-gloss | 85 | 62 | 16 | 1 | 6 |
+| all-9b-oracle | 96 | 74 | 16 | 2 | 4 |
 | all-2b-full-gloss | 14 | 12 | 0 | 1 | 1 |
-| all-2b-oracle | 24 | 14 | 5 | 1 | 4 |
+| all-2b-oracle | 24 | 15 | 4 | 1 | 4 |
 | devv1-27b-full-r0 | 25 | 21 | 2 | 0 | 2 |
 | devv1-9b-full-r0 | 38 | 25 | 2 | 3 | 8 |
 | devv1-2b-full-r0 | 9 | 5 | 1 | 1 | 2 |
@@ -67,22 +67,22 @@
 
 ### Judge calibration (E3): gpt-oss-20b (used) vs the paper's 2,400 human labels
 
-Agreement 76%. Judge says *correct* when humans say *incorrect*: 5%. Judge says *incorrect* when humans say *correct*: 15%.
+Agreement 77%. Judge says *correct* when humans say *incorrect*: 6%. Judge says *incorrect* when humans say *correct*: 13%.
 
 | Human \ Judge | correct | incorrect | refusal |
 |---|---|---|---|
-| correct | 962 | 170 | 3 |
-| incorrect | 28 | 488 | 12 |
+| correct | 987 | 145 | 3 |
+| incorrect | 31 | 485 | 12 |
 | refusal | 26 | 339 | 372 |
 
 ### Judge calibration (E3): gpt-oss-120b (reference) vs the paper's 2,400 human labels
 
-Agreement 79%. Judge says *correct* when humans say *incorrect*: 5%. Judge says *incorrect* when humans say *correct*: 15%.
+Agreement 80%. Judge says *correct* when humans say *incorrect*: 6%. Judge says *incorrect* when humans say *correct*: 11%.
 
 | Human \ Judge | correct | incorrect | refusal |
 |---|---|---|---|
-| correct | 967 | 167 | 1 |
-| incorrect | 28 | 497 | 3 |
+| correct | 1004 | 130 | 1 |
+| incorrect | 31 | 494 | 3 |
 | refusal | 24 | 281 | 432 |
 
 ### Cost per question (pass 1 only)
@@ -90,14 +90,14 @@ Agreement 79%. Judge says *correct* when humans say *incorrect*: 5%. Judge says 
 | Run | LLM calls | LLM seconds | Tokens |
 |---|---|---|---|
 | all-9b-full | 2.2 | 58.7 | 17,561 |
-| all-27b-bare | 1.0 | 69.6 | 11,031 |
 | all-27b-full | 2.3 | 189.5 | 19,907 |
+| all-2b-full | 2.0 | 21.3 | 21,845 |
+| all-27b-bare | 1.0 | 69.6 | 11,031 |
 | all-27b-oracle | 2.5 | 58.2 | 5,968 |
 | all-9b-bare | 1.0 | 30.7 | 11,014 |
 | all-9b-full-gloss | 2.2 | 59.8 | 18,242 |
 | all-9b-oracle | 2.2 | 25.4 | 4,932 |
 | all-2b-bare | 1.0 | 7.3 | 11,019 |
-| all-2b-full | 2.0 | 21.3 | 21,845 |
 | all-2b-full-gloss | 2.0 | 24.2 | 22,875 |
 | all-2b-oracle | 2.2 | 14.0 | 6,203 |
 

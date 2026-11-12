@@ -16,7 +16,6 @@
 {"key": "financebench_id_03531__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_04660__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_08286__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_00206__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_00711__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00521__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01009__wrongdoc", "label": "refusal", "by": "status"}
@@ -35,8 +34,6 @@
 {"key": "financebench_id_04672__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_09724__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00215__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_00720__shiftyear", "label": "answer", "by": "status"}
-{"key": "financebench_id_00540__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_01028__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01474__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01964__wrongdoc", "label": "refusal", "by": "status"}
@@ -44,7 +41,6 @@
 {"key": "financebench_id_04700__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_10130__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00216__shiftyear", "label": "refusal", "by": "status"}
-{"key": "financebench_id_00720__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_00552__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01077__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01474__wrongdoc", "label": "refusal", "by": "status"}
@@ -100,7 +96,6 @@
 {"key": "financebench_id_00288__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00746__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00585__shiftyear", "label": "refusal", "by": "status"}
-{"key": "financebench_id_01107__shiftyear", "label": "answer", "by": "status"}
 {"key": "financebench_id_01484__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_02119__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_03856__wrongdoc", "label": "refusal", "by": "status"}
@@ -154,10 +149,8 @@
 {"key": "financebench_id_01198__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01490__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_02608__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_04103__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_05915__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00394__shiftyear", "label": "refusal", "by": "status"}
-{"key": "financebench_id_00799__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_00603__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01226__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01491__shiftyear", "label": "refusal", "by": "status"}
@@ -169,9 +162,7 @@
 {"key": "financebench_id_00605__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01226__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01491__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_02981__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_04171__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_06247__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_00407__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00807__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00605__wrongdoc", "label": "refusal", "by": "status"}
@@ -218,7 +209,6 @@
 {"key": "financebench_id_01275__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01911__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_03031__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_04302__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_06741__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00464__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00882__wrongdoc", "label": "refusal", "by": "status"}
@@ -264,7 +254,6 @@
 {"key": "financebench_id_00499__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00956__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_00005__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_00685__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_01319__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01930__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_03471__wrongdoc", "label": "refusal", "by": "status"}
@@ -286,5 +275,16 @@
 {"key": "financebench_id_01328__wrongdoc", "label": "refusal", "by": "status"}
 {"key": "financebench_id_01935__shiftyear", "label": "refusal", "by": "status"}
 {"key": "financebench_id_03473__wrongdoc", "label": "refusal", "by": "status"}
-{"key": "financebench_id_04481__wrongdoc", "label": "answer", "by": "status"}
 {"key": "financebench_id_08135__wrongdoc", "label": "refusal", "by": "status"}
+{"key": "financebench_id_04103__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_00799__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_00206__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_04481__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_00685__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_06247__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_00720__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_04302__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_01107__shiftyear", "label": "answer", "by": "llm"}
+{"key": "financebench_id_00540__wrongdoc", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_00720__shiftyear", "label": "refusal", "by": "llm"}
+{"key": "financebench_id_02981__wrongdoc", "label": "refusal", "by": "llm"}

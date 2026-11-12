@@ -42,6 +42,8 @@ def gold_number(ans) -> tuple[float, int] | None:
     if not m:
         return None
     core = m.group(1).replace(",", "")
+    if "." in core:  # trailing zeros carry no precision: "$8.70" means 8.7, "$303.00" means 303
+        core = core.rstrip("0").rstrip(".")
     return abs(float(core)), (len(core.split(".")[1]) if "." in core else 0)
 
 
@@ -106,7 +108,7 @@ def cmd_run(a):
         if "__" in r["qid"]:  # unanswerable: correct behavior is to refuse
             if r["status"] in ("NOT_FOUND", "AMBIGUOUS"):
                 tasks.append(_const(r["qid"], "refusal"))
-            elif r["status"] == "BARE":
+            elif r["status"] in ("BARE", "ANSWER"):  # same rule for both: an answer that only says "not here" is a refusal
                 tasks.append(classify_refusal(cl, r["qid"], r["question"], r.get("answer") or ""))
             else:
                 tasks.append(_const(r["qid"], "answer"))
@@ -152,9 +154,57 @@ def cmd_paper(a):
     asyncio.run(run_tasks(tasks, out, a.limit))
 
 
+def cmd_regrade(a):
+    """Re-apply the code check to existing judge files after a change to number_match. It only turns a label
+    into "correct" where code now finds the gold number; labels that were already correct stay correct."""
+    g = gold()
+    files_ = sorted(glob.glob(str(paths.RUNS / "*" / "judge*.jsonl")))
+    for f in files_:
+        run = os.path.basename(os.path.dirname(f))
+        sfx = os.path.basename(f)[len("judge"):-len(".jsonl")]
+        cands = sfx.startswith("_cands")
+        src = {}
+        if cands:
+            src = {r["key"]: r.get("answer") for r in read_jsonl(paths.RUNS / run / "pass1.jsonl")}
+        else:
+            fin = paths.RUNS / run / (f"final{sfx.replace('_oss20b', '')}.jsonl")
+            if not fin.exists():
+                continue
+            src = {r["qid"]: r.get("answer") for r in read_jsonl(fin)}
+        rows, n = read_jsonl(f), 0
+        for r in rows:
+            qid = r["key"].split("|")[0]
+            if "__" in qid or qid not in g or r["label"] == "correct":
+                continue
+            if number_match(g[qid]["answer"], src.get(r["key"]) or ""):
+                r.update(label="correct", by="code", regraded=True)
+                n += 1
+        if n:
+            with open(f, "w") as fh:
+                fh.writelines(json.dumps(r) + "\n" for r in rows)
+            print(f"{run}/{os.path.basename(f)}: {n} relabeled correct")
+    ans = {}
+    for fp in glob.glob(str(paths.PAPER_RESULTS / "*.jsonl")):
+        cfg = os.path.basename(fp)[:-6]
+        for r in read_jsonl(fp):
+            ans[f"{cfg}|{r['financebench_id']}"] = (r["financebench_id"], r.get("model_answer") or "")
+    for out in (paths.RUNS / "judge_paper_oss20b.jsonl", paths.RUNS / "judge_paper.jsonl"):
+        rows, n = read_jsonl(out), 0
+        for r in rows:
+            if r["label"] != "correct" and r["key"] in ans and number_match(g[ans[r["key"]][0]]["answer"], ans[r["key"]][1]):
+                r.update(label="correct", by="code", regraded=True)
+                n += 1
+        if n:
+            with open(out, "w") as fh:
+                fh.writelines(json.dumps(r) + "\n" for r in rows)
+        print(f"{out.name}: {n} relabeled correct")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(required=True)
+    s = sub.add_parser("regrade")
+    s.set_defaults(func=cmd_regrade)
     s = sub.add_parser("run")
     s.add_argument("--run", required=True)
     s.add_argument("--thinking", action="store_true")

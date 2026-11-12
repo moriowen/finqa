@@ -1,212 +1,196 @@
-# FinanceBench QA with provenance
+# FinanceBench QA with provenance: a comparative study
 
-A question answering system for the 150 FinanceBench questions. For each question it returns an answer, the PDF page it came from, and the quote and passage that support it. If it cannot find and check that evidence, it says so and gives no answer.
+An experiment on the 150 FinanceBench questions. It compares Qwen3.5 models at three sizes (2B, 9B, 27B), with and without a checking pipeline (the "harness"). For every question, each configuration gives an answer with the PDF page, quote and passage behind it, or it refuses and says why. The goal is to learn which model and which setup to use for a later project. This repository does not build a product.
 
-**Live demo: https://finqa-demo.vercel.app** (replays recorded runs step by step, browses all 150 answers, shows the system diagram). The same page is in [`viewer/index.html`](viewer/index.html) and opens locally without a server. For each question it shows the answer, the Python computation, every cited page with the quote highlighted in the page text and an image of the page, the verifier's checks, and, in a collapsed box, the judge label and the gold answer. Rebuild it with `python -m finqa.evals.viewer`.
+- **Demo: https://finqa-demo.vercel.app.** It replays recorded runs step by step, lets you browse every configuration's 150 answers with the cited pages, and shows the system diagrams. The same page is in [`viewer/index.html`](viewer/index.html) and opens locally without a server.
+- **Write-up:** [`docs/report.pdf`](docs/report.pdf), 2 pages plus the diagram on page 3.
+- **All answers with provenance:** [`results/answers.md`](results/answers.md) (9B), [`results/answers-all-27b-full.md`](results/answers-all-27b-full.md), [`results/answers-all-2b-full.md`](results/answers-all-2b-full.md), [`results/answers-pathb-27b-full.md`](results/answers-pathb-27b-full.md).
 
-The 2-page write-up (plus the diagram on page 3) is [`docs/report.pdf`](docs/report.pdf), with its source in [`docs/report.md`](docs/report.md). This README holds the full results. Every answer with its provenance is in [`results/answers.md`](results/answers.md).
+## Results in one table
 
-## Main result
+Every configuration is reported as three counts out of 150: correct, wrong, refused (decision A24 in [`docs/assumptions.md`](docs/assumptions.md)). No configuration is "the official one". The table is the comparison.
 
-Official configuration: **Qwen3.5-9B with the full harness**, Path A (the filing is given). Verifier: Gemma 4 12B. Judge: gpt-oss-20b. 9B was chosen over 27B by the rule fixed in advance (lowest wrong-answer rate on the 51 dev questions: 9B 5 wrong, 27B 10 wrong, same 26 correct).
-
-| | Correct | Wrong | Refused | Wrong-answer rate |
+| Model | Setting | Correct | Wrong | Refused |
 |---|---|---|---|---|
-| Qwen3.5-9B, one prompt, same pages ("bare") | 91 | 59 | 0 | 39% |
-| **Qwen3.5-9B, full harness** | **71** | **17** | **62** | **11%** |
-| Qwen3.5-27B (FP8), full harness | 76 | 24 | 50 | 16% |
-| Qwen3.5-27B (FP8), full harness, **no filing given (Path B)** | 72 | 20 | 58 | 13% |
-| GPT-4 Turbo, FinanceBench paper, single vector store | 75 | 17 | 58 | 11% |
-| GPT-4 Turbo, FinanceBench paper, shared vector store (no filing given) | 29 | 20 | 101 | 13% |
+| Qwen3.5-2B | bare | 77 | 72 | 1 |
+| Qwen3.5-2B | full harness | 12 | 2 | 136 |
+| Qwen3.5-9B | bare | 93 | 57 | 0 |
+| Qwen3.5-9B | full harness | 72 | 16 | 62 |
+| Qwen3.5-27B (FP8) | bare | 101 | 48 | 1 |
+| Qwen3.5-27B (FP8) | full harness | 80 | 20 | 50 |
+| Qwen3.5-27B (FP8) | full harness, no filing named (Path B) | 76 | 16 | 58 |
+| GPT-4 Turbo, FinanceBench paper, single store (human labels) | | 75 | 17 | 58 |
+| GPT-4 Turbo, FinanceBench paper, shared store, no filing named (human labels) | | 29 | 20 | 101 |
 
-The harness cut the 9B model's wrong answers from 59 to 17, and coverage fell from 100% to 59%. With this trade, a local 9B model ends up close to the paper's GPT-4 Turbo single-store result. The two rows were graded differently (our judge model against the paper's human labels), so treat this as a rough comparison.
+How to read it:
 
-On 290 questions where the filing holds no answer (wrong filing, or the year shifted), the 9B full harness answered 1 time. The bare model answered 20 times.
+- **The harness trades correct answers for fewer wrong ones.** For 9B it removes 41 wrong answers and gives up 21 correct ones, which become refusals.
+- **A bigger model gets more right in every setting.** With the harness, 27B gets 8 more correct answers than 9B and 4 more wrong ones. On the 99 held-out test questions alone, 27B is ahead on both counts: 54 correct and 10 wrong, against 46 and 11 for 9B.
+- **2B makes almost no wrong answers with the harness, because it answers almost nothing** (14 of 150).
+- **Without the filing named, 27B still gets 76 right.** GPT-4 Turbo got 29 in the paper's matching setup. Both have a similar number of wrong answers. The paper used human graders and we used a model judge, so this comparison is approximate.
+- **Questions with no answer in the filing:** of 290, the harness gave 0 false answers with 2B and 9B and 1 with 27B. The same models without the harness gave 53, 20 and 22.
 
-Without being told the filing, the 27B system answered 72 questions correctly, against 29 for GPT-4 Turbo in the paper's matching setup, at the same wrong-answer rate.
+## Bare model against full harness
+
+Both settings use the same model and the same retrieved pages. Only the work around the model differs.
+
+- **Bare:** question + 12 pages → model → answer. Nothing checks the answer.
+- **Full harness:** the model must list each value with its page and exact quote. Code checks every quote, Python does the arithmetic, code checks every number in the answer, and a second model (Gemma 4 12B) checks the cited page images. If any check fails, the system refuses and gives the reason.
+
+The difference between the two rows of a model shows what the checks add, apart from how good the model is.
+
+## Who refuses: the model or the harness
+
+| Model, full harness | Refused | The model itself said "not found" | Harness code (a check failed twice) | Verifier (Gemma) |
+|---|---|---|---|---|
+| 2B | 136 | 70 | 62 | 4 |
+| 9B | 62 | 18 | 35 | 9 |
+| 27B | 50 | 14 | 30 | 5 |
+
+Most refusals come from the harness. A smaller model fails the format checks more often, so it refuses more. That is also why 9B has fewer wrong answers than 27B: some questions that 27B answered wrongly, 9B never got past the checks.
 
 ## How it works
 
 ![System flow: each stage, its technology, and the decision behind it](docs/diagrams/system-flow.svg)
 
-The diagram shows each stage with its technology on the left and the decision behind it on the right. Red marks where the system refuses. It is generated by [`docs/diagrams/system_flow.py`](docs/diagrams/system_flow.py).
+Each stage is on the left with its technology, and the decision behind it is on the right. Red marks where the system refuses. Generated by [`docs/diagrams/system_flow.py`](docs/diagrams/system_flow.py).
 
-1. **Index (once).** PyMuPDF reads every page twice: plain text for search, layout text (columns joined with `|`) for the model to read. Pages whose title is a primary financial statement form a "statement pack" for each filing.
-2. **Retrieve.** For the question's filing: the statement pack, plus the top BM25 pages, plus the top pages by dense similarity (Qwen3-Embedding-8B). At most 12 pages.
-3. **Call 1: extract.** The model returns JSON (schema enforced by vLLM): each value it needs, with the page, the exact quote, the column, the period and the scale, plus a formula over the value names.
-4. **Code checks.**
-   - G3: the quote is on that page, and the value is in the quote.
-   - G5: the formula uses only value names and a few functions (avg, sum, cagr, abs, max, min). Python does the arithmetic. The model never does.
-5. **Call 2: answer.** Plain text that cites values as `[v1]`.
-   - G4: every number in the answer must be a checked value or the computed result.
-   - A failed check gets one retry with the error message, then NOT_FOUND.
-6. **Verifier.** A model from a different family (Gemma 4 12B) gets the question, the evidence, the answer and images of the cited pages. It must confirm the period, the unit, the column and the support. Anything other than a clear yes gives NOT_FOUND.
-7. **Output.** ANSWER, NOT_FOUND or AMBIGUOUS. The provenance (filing, PDF page, quote, passage, column, scale) is attached by code from the checked values. The model never writes it. Each row also names the answering model and the verifier.
+1. **Index (once).** PyMuPDF reads every page twice: plain text for search, layout text (columns joined with `|`) for the model to read. One chunk is one PDF page. Pages whose title is a primary financial statement form a "statement pack" for each filing.
+2. **Retrieve.** For the filing: the statement pack, the top BM25 pages and the top pages by embedding similarity (Qwen3-Embedding-8B), at most 12 pages.
+3. **Call 1: extract.** The model returns JSON (schema enforced by vLLM): each value with page, exact quote, column, period and scale, plus a formula over value names.
+4. **Code checks and Python.** G3: the quote is on the page and the value is in the quote. G5: the formula uses only value names and avg, sum, cagr, abs, max, min. Python computes.
+5. **Call 2: answer.** Plain text citing `[v1]`. G4: every number must be a checked value or the computed result.
+6. **Verifier.** Gemma 4 12B checks period, unit, column and support on images of the cited pages.
+7. **Output.** ANSWER with provenance attached by code, or NOT_FOUND / AMBIGUOUS with the reason.
 
-Path B (no filing given): a router (LLM, enforced choice from the 42 companies) picks up to 3 candidate filings by company, period and type. Each runs the pipeline separately, and G8 combines them: if they disagree, the result is AMBIGUOUS with each value and its provenance. Path B was evaluated with 27B only.
+A failed check gets one retry with the error list, then NOT_FOUND. With no filing named (Path B), a router picks up to 3 candidate filings, each runs separately, and disagreement gives AMBIGUOUS.
 
-Every design decision, with its evidence and what happens if it is wrong, is in [`docs/assumptions.md`](docs/assumptions.md) (A1 to A23). The design is in [`docs/architecture.md`](docs/architecture.md), and the run log is in [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md).
+### Inside the harness
+
+![Harness data flow: data at each step, the rule each check enforces, retry and refusal paths](docs/diagrams/harness-detail.svg)
+
+The data at each step, the rule each check enforces, and where a failure goes. Generated by [`docs/diagrams/harness_detail.py`](docs/diagrams/harness_detail.py).
+
+Every design decision, with its evidence and what happens if it is wrong, is in [`docs/assumptions.md`](docs/assumptions.md) (A1 to A24). The run log is in [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md).
 
 ## Evaluation method
 
-- **Split.** 51 dev questions for all tuning and 99 test questions that were run once with the frozen harness. The split is stratified by question type with seed 0 ([`eval/split.json`](eval/split.json)).
-- **Labels.** Correct, wrong or refused. The headline metric is the **wrong-answer rate** (wrong / 150), because a wrong answer costs more than no answer. We also report coverage (answered / 150) and selective accuracy (correct / answered).
-- **Judge.** If the gold answer is a number, code checks it at the gold precision, with unit conversion. Otherwise gpt-oss-20b compares the answer with the gold answer and its justification. The pipeline never sees gold data. A test checks this.
-- **Judge calibration.** Before we trusted the judge, it graded the paper's 2,400 human-labeled answers.
-- **Unanswerable set.** 290 questions made by pairing each question with the wrong filing (150) or by shifting its year (140). The correct output is always NOT_FOUND.
+- **Split.** 51 dev questions for all tuning, 99 test questions run once with the frozen harness ([`eval/split.json`](eval/split.json), stratified by question type, seed 0).
+- **Labels.** Correct, wrong or refused, reported as three counts.
+- **Grading.** If the gold answer is a number, code checks it at the gold answer's precision (trailing zeros carry no precision: "$8.70" means 8.7), with unit conversion. Otherwise gpt-oss-20b compares the answer with the gold answer and its justification. The pipeline never sees gold data, and a test checks this.
+- **Judge calibration.** On the paper's 2,400 human-labeled answers, gpt-oss-20b agrees with the humans 77% of the time. It calls a wrong answer correct 5.9% of the time and a correct answer wrong 12.8% of the time. gpt-oss-120b, for reference: 80%, 5.9%, 11.5%.
+- **Unanswerable set.** 290 questions: each question paired with another company's filing (150), or with its year shifted outside the filing (140). The correct output is always a refusal. Every answer on this set, bare or full, goes through the same refusal classifier, so an answer that only says "this filing is about another company" counts as a refusal.
 
-## Results
+## Detailed results
 
-All numbers come from `python -m finqa.evals.tables` ([`results/tables.md`](results/tables.md), [`results/summary.json`](results/summary.json)). Nothing below is typed by hand.
+All numbers come from `python -m finqa.evals.tables` ([`results/tables.md`](results/tables.md), [`results/summary.json`](results/summary.json)). Nothing is typed by hand.
 
-### Model size × harness (150 questions)
+### Every setting (150 questions, filing named)
 
-"Bare" = the same retrieved pages and one prompt, without checks. "Oracle" = the gold pages instead of retrieval (a control, not part of the system). "Gloss" = a glossary of financial definitions added to the prompt (not run for 27B, because it hurt 2B and 9B).
+"Oracle" gives the model the gold pages instead of retrieved ones. It is a control that measures what retrieval costs. "Glossary" adds financial definitions to the prompt.
 
-| Model | Setting | Correct | Wrong | Refused | Wrong-answer rate [95% CI] | Coverage | Selective accuracy | Cited page is a gold page | Test only (99): wrong / correct |
-|---|---|---|---|---|---|---|---|---|---|
-| Qwen3.5-27B (FP8) | bare | 100 | 49 | 1 | 33% [25 to 40] | 99% | 67% | n/a | 32% / 67% |
-| Qwen3.5-27B (FP8) | full | 76 | 24 | 50 | 16% [10 to 22] | 67% | 76% | 85% | 14% / 51% |
-| Qwen3.5-27B (FP8) | oracle pages | 89 | 16 | 45 | 11% [6 to 15] | 70% | 85% | 100% | 10% / 57% |
-| Qwen3.5-9B | bare | 91 | 59 | 0 | 39% [31 to 47] | 100% | 61% | n/a | 38% / 62% |
-| Qwen3.5-9B | **full** | 71 | 17 | 62 | **11% [7 to 17]** | 59% | 81% | 84% | 12% / 45% |
-| Qwen3.5-9B | full + glossary | 61 | 17 | 72 | 11% [7 to 17] | 52% | 78% | 86% | 13% / 39% |
-| Qwen3.5-9B | oracle pages | 71 | 19 | 60 | 13% [7 to 19] | 60% | 79% | 100% | 13% / 48% |
-| Qwen3.5-2B | bare | 73 | 76 | 1 | 51% [43 to 59] | 99% | 49% | n/a | 48% / 51% |
-| Qwen3.5-2B | full | 12 | 2 | 136 | 1% [0 to 3] | 9% | 86% | 79% | 1% / 7% |
-| Qwen3.5-2B | full + glossary | 12 | 0 | 138 | 0% [0 to 0] | 8% | 100% | 83% | 0% / 8% |
-| Qwen3.5-2B | oracle pages | 14 | 5 | 131 | 3% [1 to 7] | 13% | 74% | 100% | 4% / 8% |
+| Model | Setting | Correct | Wrong | Refused | Test only (99): correct / wrong / refused | Cited page is a gold page |
+|---|---|---|---|---|---|---|
+| 2B | bare | 77 | 72 | 1 | 54 / 44 / 1 | n/a |
+| 2B | full | 12 | 2 | 136 | 7 / 1 / 91 | 11 of 14 |
+| 2B | full + glossary | 12 | 0 | 138 | 8 / 0 / 91 | 10 of 12 |
+| 2B | oracle pages | 15 | 4 | 131 | 9 / 3 / 87 | 19 of 19 |
+| 9B | bare | 93 | 57 | 0 | 63 / 36 / 0 | n/a |
+| 9B | full | 72 | 16 | 62 | 46 / 11 / 42 | 74 of 88 |
+| 9B | full + glossary | 62 | 16 | 72 | 40 / 12 / 47 | 67 of 78 |
+| 9B | oracle pages | 73 | 17 | 60 | 50 / 11 / 38 | 90 of 90 |
+| 27B (FP8) | bare | 101 | 48 | 1 | 67 / 31 / 1 | n/a |
+| 27B (FP8) | full | 80 | 20 | 50 | 54 / 10 / 35 | 86 of 101 |
+| 27B (FP8) | oracle pages | 92 | 13 | 45 | 59 / 7 / 33 | 107 of 107 |
+| 27B (FP8) | Path B, no filing named | 76 | 16 | 58 | 50 / 7 / 42 | 69 of 92 |
+
+The glossary was not run for 27B, because it lowered coverage for 2B and 9B without reducing wrong answers.
 
 ### Questions with no answer in the filing (290 per model)
 
-| Model | Setting | False answers | Wrong filing | Shifted year |
-|---|---|---|---|---|
-| Qwen3.5-27B (FP8) | bare | 22/290 (8%) | 7% | 9% |
-| Qwen3.5-27B (FP8) | full | 12/290 (4%) | 7% | 1% |
-| Qwen3.5-9B | bare | 20/290 (7%) | 5% | 9% |
-| Qwen3.5-9B | full | 1/290 (0.3%) | 0% | 1% |
-| Qwen3.5-9B | full + glossary | 2/290 (1%) | 1% | 1% |
-| Qwen3.5-2B | bare | 53/290 (18%) | 17% | 20% |
-| Qwen3.5-2B | full | 0/290 (0%) | 0% | 0% |
-| Qwen3.5-2B | full + glossary | 2/290 (1%) | 1% | 0% |
+| Model | Bare: false answers | Full harness: false answers |
+|---|---|---|
+| 2B | 53 | 0 |
+| 9B | 20 | 0 |
+| 27B (FP8) | 22 | 1 |
 
-The 27B full count needs a note. In 10 of its 12 "false answers", the answer itself says that the filing belongs to another company ("the metric is not applicable because the provided evidence is for Amcor, not JPM"). Many questions say "if the metric is not useful, say so", and 27B used that route to refuse. The system returns these with status ANSWER, so the score counts them as answers. In substance only about 2 of the 12 are real false answers.
-
-### Size ladder: what a bigger model buys
+### Size ladder
 
 | | 2B | 9B | 27B (FP8) |
 |---|---|---|---|
-| Bare: correct / wrong | 73 / 76 | 91 / 59 | 100 / 49 |
-| Full harness: correct / wrong | 12 / 2 | 71 / 17 | 76 / 24 |
-| Oracle pages: correct / wrong | 14 / 5 | 71 / 19 | 89 / 16 |
-| Reach the verifier (pass all code checks) | 18 | 97 | 106 |
-| LLM seconds per question (full) | 21 | 59 | 190 |
+| Pass all code checks (reach the verifier) | 18 | 97 | 106 |
+| Gain from gold pages, full harness (correct) | +3 | +1 | +12 |
+| LLM seconds per question, full harness | 21 | 59 | 190 |
 
-- Size helps the bare model steadily: 51%, 39%, 33% wrong.
-- With the harness, 9B gives the best wrong-answer rate. 27B answers 5 more questions correctly but 7 more wrongly. 27B passes more checks, and the weak verifier lets more of its wrong answers through.
-- Retrieval matters for 27B and not for 9B. With gold pages, 27B gains 13 correct answers and loses 8 wrong ones. 9B gains nothing. A bigger model can use good pages, and a smaller one fails earlier, at reading.
-
-### Path B: no filing given (27B, full harness)
-
-| Correct | Wrong | Refused (NOT_FOUND / AMBIGUOUS) | Wrong-answer rate | Coverage | Cost per question |
-|---|---|---|---|---|---|
-| 72 | 20 | 58 (44 / 14) | 13% | 61% | 4.4 LLM calls, 391 s |
-
-The router sent 150 questions to 333 candidate filings. Path B lost only 4 correct answers against Path A for the same model. 14 questions came back AMBIGUOUS because two candidate filings gave different answers.
-
-### Where the 9B answers are lost (full harness, 150 questions)
-
-| Stage outcome | Questions |
-|---|---|
-| Answered (all checks passed) | 88 |
-| Extractor: evidence not in the retrieved pages | 18 |
-| Number check (G4) failed twice | 12 |
-| Formula check (G5) failed twice | 12 |
-| Quote check (G3) failed twice | 11 |
-| Verifier rejected | 9 |
+- A bigger model passes the checks more often, so it answers more.
+- Gold pages help 27B a lot (+12 correct) and 9B hardly at all (+1). 9B loses its answers at reading and checking, so better pages do not help it. 27B can use better pages.
 
 ### Verifier (Gemma 4 12B) against the judge
 
-These are the answers that passed all code checks, before the verifier. "Leak" = the verifier accepted a wrong answer.
+Answers that passed every code check, before the verifier. "Let through" = the verifier accepted a wrong answer.
 
-| Run | Checked | Accepted correct | Accepted wrong (leak) | Rejected correct (lost) | Rejected wrong (caught) |
+| Run | Checked | Accepted, correct | Accepted, wrong (let through) | Rejected, correct (lost) | Rejected, wrong (caught) |
 |---|---|---|---|---|---|
-| 27B full | 106 | 79 | 22 | 1 | 4 |
-| 27B oracle | 119 | 88 | 19 | 5 | 7 |
-| 27B Path B (per candidate filing) | 165 | 119 | 35 | 1 | 10 |
-| 9B full | 97 | 70 | 18 | 1 | 8 |
-| 9B full + glossary | 85 | 61 | 17 | 1 | 6 |
-| 9B oracle | 96 | 72 | 18 | 2 | 4 |
 | 2B full | 18 | 12 | 2 | 1 | 3 |
-| 2B full + glossary | 14 | 12 | 0 | 1 | 1 |
-| 2B oracle | 24 | 14 | 5 | 1 | 4 |
+| 9B full | 97 | 70 | 18 | 2 | 7 |
+| 27B full | 106 | 82 | 19 | 1 | 4 |
+| 27B Path B (per candidate filing) | 165 | 127 | 27 | 1 | 10 |
 
-On the 9B full run, the verifier caught 8 of 26 wrong answers and lost 1 correct one. It is cheap and rarely loses a correct answer, but it misses most wrong ones.
+The verifier rarely rejects a correct answer, but it lets most wrong answers through: it caught 7 of 25 for 9B and 4 of 23 for 27B. It is smaller than the 27B model it checks.
 
 ### Retrieval (dev, 51 questions, 12-page budget)
 
-| Arm | Gold page recall |
+| Option | Gold page found |
 |---|---|
-| R0 statement pack + BM25 | 84% |
-| **R1 + dense embeddings (used)** | **87%** |
-| R2 + LLM query planning | 87% |
-| R3 all of the above | 90% |
+| Statement pack + BM25 | 84% |
+| **+ dense embeddings (used)** | **87%** |
+| + LLM query planning | 87% |
+| All of the above | 90% |
 
-Rule fixed before the results: take the cheapest arm within 5 points of the best. R3 needs an extra LLM call per question, so R1 won.
-
-### Judge calibration (paper's 2,400 human-labeled answers)
-
-| Judge | Agreement | Says correct when humans say wrong | Says wrong when humans say correct |
-|---|---|---|---|
-| **gpt-oss-20b (used)** | 76% | 5.3% | 15% |
-| gpt-oss-120b (reference) | 79% | 5.3% | 15% |
-
-The 20b judge errs on the strict side. Most of the disagreement comes from the paper's refusals, which it labels "incorrect". This does not affect our runs, because our refusals are labeled from the status field without the judge. It also marks about 15% of human-correct answers as wrong, so our correct counts are likely a little low.
+Rule fixed before the results: take the cheapest option within 5 points of the best.
 
 ### FinanceBench paper baselines (human labels, same 150 questions)
 
-| Paper configuration | Correct | Wrong | Refused | Wrong-answer rate | Coverage |
-|---|---|---|---|---|---|
-| GPT-4 Turbo, oracle | 128 | 22 | 0 | 15% | 100% |
-| GPT-4 Turbo, single store | 75 | 17 | 58 | 11% | 61% |
-| GPT-4 Turbo, shared store | 29 | 20 | 101 | 13% | 33% |
-| GPT-4, single store | 63 | 16 | 71 | 11% | 53% |
-| Llama 2, single store | 62 | 81 | 7 | 54% | 95% |
+| Paper configuration | Correct | Wrong | Refused |
+|---|---|---|---|
+| GPT-4 Turbo, gold pages | 128 | 22 | 0 |
+| GPT-4 Turbo, single store | 75 | 17 | 58 |
+| GPT-4 Turbo, shared store | 29 | 20 | 101 |
+| GPT-4, single store | 63 | 16 | 71 |
+| Llama 2, single store | 62 | 81 | 7 |
 
 ## What worked
 
-- **Code does the arithmetic, and code attaches the provenance.** Each ANSWER carries a quote that exists on the cited page. On the 9B run, 84% of answers cite a gold page, and 100% cite the right filing.
-- **Checks between the model and the user.** The 9B wrong-answer rate fell from 39% to 11%, and false answers on unanswerable questions fell from 20 to 1.
-- **The statement pack.** Most FinanceBench evidence sits on the income statement, the balance sheet or the cash flow statement. Always showing those pages gave 84% recall before any learned retrieval.
-- **A dev/test split with rules written before the results.** The test numbers (12% wrong for 9B) match the full set (11%), so tuning on dev did not overfit.
+- **Checks between the model and the user.** For every size, the harness cut wrong answers sharply, and false answers on unanswerable questions fell to 0 or 1.
+- **Code does the arithmetic and attaches the provenance.** Every answer cites a quote that exists on its page. When the filing is named, every answer cites that filing.
+- **The statement pack.** Most evidence is on the three primary statements. Always showing those pages gave 84% recall before any learned retrieval.
+- **Rules written before the results, and a held-out test set.** Test-only numbers track the full-set numbers, so tuning on dev did not overfit.
+- **Routing without a named filing.** With 27B, Path B lost only 4 correct answers against Path A.
 
 ## What did not work
 
-- **Retrieval is not the bottleneck for 9B.** With the gold pages (oracle), 9B gets the same 71 correct answers. The losses are in reading and reasoning: 35 questions fail a code check twice, and 18 more fail at extraction. For 27B, retrieval does cost 13 correct answers.
-- **A bigger model did not lower the wrong-answer rate.** 27B is better bare, but with the harness it answers more and is wrong more (16% against 11%). The verifier is the weak link: it caught 4 of 26 wrong 27B answers.
-- **"Not applicable" leaks through as an answer.** The model can mark a metric as not applicable, and the system returns that as an ANSWER. 27B used this route to say "this is the wrong company". The fix is to map those cases to NOT_FOUND.
-- **The 2B model is too weak for strict checks.** It answers only 9% of questions. Those answers are almost always right, but the system is close to useless at that coverage.
-- **The glossary hurt.** Coverage fell from 59% to 52%, and the wrong count stayed the same.
-- **The verifier misses most wrong answers.** Of the 17 wrong 9B answers, most are not reading errors. They are definition choices: working capital from total instead of operating current assets, a different quick ratio, capex/revenue instead of assets/revenue for capital intensity. Others are judgment questions where the model's yes/no differs from the analyst's. A verifier that only checks the cited page cannot catch a valid number that answers a different definition.
-- **Judge strictness.** At least one "wrong" answer is a judge error: General Mills free cash flow, 3,215.4 against gold "$3215.00". We kept the judge's label.
+- **The verifier.** It catches about a quarter of the wrong answers that pass the code checks.
+- **Definitions.** Most remaining wrong answers use a real, correctly cited number for a different definition of the metric: working capital from total instead of operating items, a different quick ratio, capex/revenue instead of assets/revenue. No check catches this, and a glossary in the prompt did not help.
+- **Small models and strict checks.** 2B refuses 91% of questions. Its few answers are right, but it is not usable.
+- **9B loses answers to format errors.** It fails code checks twice on 35 questions, for example by putting `/1000` in a formula or copying a quote inexactly.
 
-## What to change next
+## What would change the choice of model
 
-1. **Definitions.** When a question names a metric with more than one common definition, the system should state the definition it used, or ask. The glossary tried to fix the definition in advance and failed. Showing the choice to the user is better.
-2. **A stronger verifier** that also checks the formula against the question, not only the page values. Most of the remaining wrong answers come from the formula.
-3. **Fewer losses at the checks.** 35 questions fail a code check twice. A third retry with the full error history, or a larger model on retry only, would recover some of them.
-4. **Map "not applicable because the filing is about another company" to NOT_FOUND** (a code check on the company name in the filing metadata).
-5. **Path B with 9B,** to compare the router with the model that has the best Path A wrong-answer rate.
+- **If a wrong answer is far worse than a refusal:** 9B or 27B with the harness, plus a stronger verifier. 9B has slightly fewer wrong answers on the full set. 27B has more correct answers and is ahead on the held-out test set.
+- **If coverage matters more:** 27B, which gets the most correct answers in every setting.
+- **If cost matters:** 9B, which is about 3 times faster per question than 27B.
+- **What to fix first, for any model:** a stronger verifier that also checks the formula against the question, and a way to show which definition of a metric the answer used.
 
 ## Limitations and compute
 
-The work ran on Georgia Tech PACE ICE with a student allocation. 80 GB GPUs (H100, H200, A100-80GB) waited in the queue for more than a day, so we changed the plan:
+The work ran on Georgia Tech PACE ICE with a student allocation. 80 GB GPUs waited in the queue for more than a day, so:
 
-- **27B ran in FP8.** Qwen3.5-27B in bf16 (about 52 GB) does not fit on one 47 GB Blackwell partition, and ICE's Blackwell cards are MIG partitions that cannot be joined for a split model. We used Qwen's official FP8 checkpoint (`Qwen/Qwen3.5-27B-FP8`, 31 GB). FP8 is usually very close to bf16, but it is not identical.
-- **A smaller verifier and judge.** Gemma 4 12B replaced the planned Qwen3.5-27B verifier. A non-Qwen verifier is a better design, because it does not share the answering model's errors. gpt-oss-20b replaced gpt-oss-120b as the judge, and its calibration is shown above.
-- **One seed, temperature 0.** No variance across seeds.
+- **27B ran in FP8** (`Qwen/Qwen3.5-27B-FP8`, 31 GB), on one 47 GB Blackwell partition. bf16 (52 GB) did not fit, and the partitions cannot be joined. FP8 is usually very close to bf16, but not identical.
+- **A smaller verifier and judge:** Gemma 4 12B instead of a 27B verifier, gpt-oss-20b instead of gpt-oss-120b. The judge's calibration is above.
+- **One run per configuration,** temperature 0. No variance across seeds.
+- **Dev round 2 fixes were tested on 2B and 9B only,** because 27B could not get a GPU at that time.
 
-**With more compute:** run 27B in bf16 and larger models, a larger verifier with reasoning turned on, the 120b judge, Path B for every size, and several seeds. The harness does not change for any of this: each model is a setting of the job script.
+With more compute: 27B in bf16 and larger models, a larger verifier with reasoning, the 120b judge, Path B for every size, and several seeds. Each model is one setting in the job script, so the harness does not change.
 
 ## Reproduce
 
@@ -215,9 +199,11 @@ scripts/fetch_data.sh                    # FinanceBench clone into data/
 python -m finqa.cli embed                # page vectors (GPU)
 ./pace/submit.sh final                   # pass 1 for each run, on ICE (see pace/)
 # verifier and judge: pace/job.sbatch with MODEL=google/gemma-4-12B-it / openai/gpt-oss-20b
+python -m finqa.evals.judge regrade      # re-apply the code grading rule to existing judge files
 python -m finqa.evals.publish --main all-9b-full --runs ...
 python -m finqa.evals.tables > results/tables.md
-pytest -q                                # 31 tests, including the gold-leakage guard
+python -m finqa.evals.viewer             # rebuild the demo data
+pytest -q
 ```
 
-Code layout: `finqa/` (pipeline: parse, retrieve, answer, checks, formula, verify), `finqa/evals/` (judge, metrics, tables, the only module that reads gold data), `pace/` (Slurm and vLLM scripts), `runs/` (every model output, JSONL).
+Code layout: `finqa/` (pipeline: parse, retrieve, answer, checks, formula, verify), `finqa/evals/` (judge, metrics, tables, viewer, the only code that reads gold data), `pace/` (Slurm and vLLM scripts), `runs/` (every model output, JSONL).

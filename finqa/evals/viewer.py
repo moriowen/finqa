@@ -16,7 +16,7 @@ from .report import files
 
 OUT = paths.ROOT / "viewer"
 RUNS = [  # (run, label)
-    ("all-9b-full", "Qwen3.5-9B, full pipeline, filing given (official)"),
+    ("all-9b-full", "Qwen3.5-9B, full pipeline, filing given"),
     ("all-27b-full", "Qwen3.5-27B FP8, full pipeline, filing given"),
     ("pathb-27b-full", "Qwen3.5-27B FP8, full pipeline, no filing given (Path B)"),
     ("all-2b-full", "Qwen3.5-2B, full pipeline, filing given"),
@@ -130,7 +130,8 @@ def main():
         print(run, len(rows))
     data["presets"] = presets(g)
     print("presets", len(data["presets"]))
-    (OUT / "system-flow.svg").write_text((paths.ROOT / "docs" / "diagrams" / "system-flow.svg").read_text())
+    for name in ("system-flow.svg", "harness-detail.svg"):
+        (OUT / name).write_text((paths.ROOT / "docs" / "diagrams" / name).read_text())
     (OUT / "data.js").write_text("window.DATA = " + json.dumps(data, separators=(",", ":")) + ";\n")
     print("pages", len(list((OUT / "pages").glob("*.jpg"))))
 

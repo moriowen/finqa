@@ -1,4 +1,4 @@
-# Answers with provenance
+# Answers with provenance: all-9b-full
 
 Configuration: `all-9b-full`. One section per question, in dataset order. Status ANSWER = all checks passed; NOT_FOUND / AMBIGUOUS = the system abstained (the reason says which check failed). PDF page numbers are 1-based. `Judge` is the eval label against the gold answer (not visible to the system).
 
@@ -4594,7 +4594,7 @@ Yes, his name is Richard A. Johnson
 
 `financebench_id_04854` · filing `GENERALMILLS_2020_10K` · metrics-generated
 
-**Status:** ANSWER · **Judge:** incorrect · **Models:** answer `Qwen/Qwen3.5-9B`, verifier `google/gemma-4-12B-it`
+**Status:** ANSWER · **Judge:** correct · **Models:** answer `Qwen/Qwen3.5-9B`, verifier `google/gemma-4-12B-it`
 
 **Answer:** The FY2020 free cash flow for General Mills is 3,215.4 million USD, calculated by subtracting capital expenditures of 460.8 million from net cash provided by operating activities of 3,676.2 million [v1, v2, COMPUTED RESULT].
 

@@ -23,7 +23,7 @@ def answers_md(run: str) -> str:
     fin, jud = files(run)
     rows = {r["qid"]: r for r in read_jsonl(paths.RUNS / run / fin)}
     labs = {r["key"]: r["label"] for r in read_jsonl(paths.RUNS / run / jud)}
-    lines = [f"# Answers with provenance\n",
+    lines = [f"# Answers with provenance: {run}\n",
              f"Configuration: `{run}`. One section per question, in dataset order. "
              "Status ANSWER = all checks passed; NOT_FOUND / AMBIGUOUS = the system abstained (the reason says which check failed). "
              "PDF page numbers are 1-based. `Judge` is the eval label against the gold answer (not visible to the system).\n"]
@@ -61,6 +61,9 @@ def main(argv=None):
     a = ap.parse_args(argv)
     OUT.mkdir(exist_ok=True)
     (OUT / "answers.md").write_text(answers_md(a.main))
+    for r in a.runs:  # one answer file per full-harness configuration (comparative study, A24)
+        if r.startswith(("all-", "pathb-")) and r.endswith("-full"):
+            (OUT / f"answers-{r}.md").write_text(answers_md(r))
     summary = {"main": a.main, "runs": {r: run_metrics(r) for r in [a.main] + a.runs},
                "paper_baselines": paper_baselines()}
     summary["verifier_check"] = {r: v for r in [a.main] + a.runs if (v := verifier_check(r))}
