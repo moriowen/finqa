@@ -82,14 +82,6 @@ def main():
         for h, row in jc["confusion_human_rows"].items():
             out.append(f"| {h} | {row['correct']} | {row['incorrect']} | {row['refusal']} |")
 
-    dec = paths.RUNS / "decisions.json"
-    if dec.exists():
-        d = json.loads(dec.read_text())
-        out.append("\n### Dev decisions (rules fixed before the dev results; `finqa/evals/autopilot.py`)\n")
-        out.append(f"Retrieval arm **{d['arm']}** (dev recall: " + ", ".join(f"{k} {v:.2f}" for k, v in d['evidence']['recall'].items()) +
-                   f"). Glossary **{'on' if d['glossary'] else 'off'}**. Verifier thinking **{'on' if d['thinking'] else 'off'}**. "
-                   f"Page images in call 1 **{'on' if d['images'] else 'off'}**. Official answers from **Qwen3.5-{d['main'].upper()}**.")
-
     out.append("\n### Cost per question (pass 1 only)\n")
     out.append("| Run | LLM calls | LLM seconds | Tokens |\n|---|---|---|---|")
     for k, r in runs.items():

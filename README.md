@@ -271,9 +271,8 @@ With more compute: 27B in bf16 and larger models, a larger verifier with reasoni
 
 ```bash
 scripts/fetch_data.sh                    # FinanceBench clone into data/
-python -m finqa.cli embed                # page vectors (GPU)
-./pace/submit.sh final                   # pass 1 for each run, on ICE (see pace/)
-# verifier and judge: pace/job.sbatch with MODEL=google/gemma-4-12B-it / openai/gpt-oss-20b
+# PDFs are parsed on first use and cached in artifacts/pages/ (finqa/parse.py)
+bash pace/experiments.sh embed           # then: answer, find, verify, judge, latency (GPU jobs on ICE)
 python -m finqa.evals.judge regrade      # re-apply the code grading rule to existing judge files
 python -m finqa.evals.publish --main all-9b-full --runs ...
 python -m finqa.evals.tables > results/tables.md
@@ -281,4 +280,4 @@ python -m finqa.evals.viewer             # rebuild the demo data
 pytest -q
 ```
 
-Code layout: `finqa/` (pipeline: parse, retrieve, answer, checks, formula, verify), `finqa/evals/` (judge, metrics, tables, viewer, the only code that reads gold data), `pace/` (Slurm and vLLM scripts), `runs/` (every model output, JSONL).
+Code layout: `finqa/` (pipeline: corpus, parse, retrieve, pass0 router, answer, checks, formula, verify, llm client, cli, bench), `finqa/evals/` (judge, metrics, tables, publish, viewer; the only code that reads gold data), `pace/` (Slurm and vLLM job scripts, `experiments.sh` lists every job), `runs/` (every model output, JSONL), `viewer/` (the demo).

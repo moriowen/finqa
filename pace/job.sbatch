@@ -1,6 +1,6 @@
 #!/bin/bash
 # Generic job: serve one model with vLLM, run one command against it, stop (A21).
-#   sbatch --export=ALL,MODEL=Qwen/Qwen3.5-2B,CMD="python -m finqa.smoke" pace/job.sbatch
+#   sbatch --export=ALL,MODEL=Qwen/Qwen3.5-9B,CMD="python -m finqa.cli pass1 --run all-9b-full --set all --arm r1" pace/job.sbatch
 # Optional: SERVE_ARGS (extra vllm flags), MAXLEN (default 16384), NO_SERVE=1 (run CMD only).
 #SBATCH -J finqa
 #SBATCH -p ice-gpu

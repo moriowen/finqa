@@ -53,3 +53,6 @@ The 27B jobs waited more than a day for an 80 GB GPU. The user chose to skip 27B
 - Results are organized as experiment 1 (filing given: 2B, 9B, 27B), experiment 2 (filing not given: 9B, 27B), experiment 3 (router vs reader: 9B and 27B in a 2x2 grid; the cell "9B router, 27B reader" was not run), and a latency benchmark. 2B is out of experiments 2 and 3.
 - 9B router output: `runs/pass0/route_9b.jsonl`. Runs `pathb-9b-full` (9B routes, 9B reads) and `pathb-9b-r27` (27B routes, 9B reads). `--routes` on pass1 selects the router output.
 - Latency: `finqa/bench.py` + `pace/bench.sbatch` (answering model and Gemma on two MIG partitions, streaming for time to first token). 20 dev questions, single and batch. Results in `runs/bench/`.
+
+### 2026-11-11: cleanup before the code walkthrough
+Removed code that no result depends on: `finqa/evals/interim.py`, `dev_analysis.py`, `autopilot.py`, `finqa/smoke.py`, `pace/smoke/`, `pace/cpu.sbatch`, `pace/submit.sh` (replaced by `pace/experiments.sh`, which lists the jobs actually run), the old hand-drawn architecture diagram (replaced by `docs/diagrams/system-flow.svg`). All of it stays in git history.
