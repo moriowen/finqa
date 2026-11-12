@@ -45,8 +45,8 @@ ANSWER = [
      "Every number in the text must be a checked value or the computed result. One retry with the error.",
      "fails twice"),
     ("llm", "Verifier", "Gemma 4 12B · cited pages as 150 dpi images",
-     "A different model family, so it does not share the answering model's mistakes. Checks period, unit, "
-     "column and support. Anything but a clear yes is a refusal.", "not a clear yes"),
+     "Gemma checks the cited page images for period, unit, column and support. "
+     "Anything but a clear yes is a refusal.", "not a clear yes"),
     ("code", "Combine filings (G8)", "Path B only",
      "One filing answers → that answer. All agree → answer. They disagree → AMBIGUOUS, with each value and "
      "its source.", "filings disagree"),

@@ -3,7 +3,7 @@
 An experiment on the 150 FinanceBench questions. It compares Qwen3.5 models at three sizes (2B, 9B, 27B), with and without a checking pipeline (the "harness"). For every question, each configuration gives an answer with the PDF page, quote and passage behind it, or it refuses and says why. The goal is to learn which model and which setup to use for a later project. This repository does not build a product.
 
 - **Demo: https://finqa-demo.vercel.app.** It replays recorded runs step by step, lets you browse every configuration's 150 answers with the cited pages, and shows the system diagrams. The same page is in [`viewer/index.html`](viewer/index.html) and opens locally without a server.
-- **Write-up:** [`docs/report.pdf`](docs/report.pdf), 2 pages plus the diagram on page 3.
+- **Write-up:** [`docs/FinanceBench-QA-Report.pdf`](docs/FinanceBench-QA-Report.pdf), 2 pages plus the diagram on page 3.
 - **All answers with provenance:** [`results/answers.md`](results/answers.md) (9B), [`results/answers-all-27b-full.md`](results/answers-all-27b-full.md), [`results/answers-all-2b-full.md`](results/answers-all-2b-full.md), [`results/answers-pathb-27b-full.md`](results/answers-pathb-27b-full.md).
 
 ## Experiments

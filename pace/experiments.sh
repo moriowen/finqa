@@ -23,7 +23,8 @@ case "${1:?step}" in
     job q27b Qwen/Qwen3.5-27B-FP8 "$P1 --run all-27b-full && $P1 --run all-27b-bare --mode bare && $P1 --run all-27b-oracle --mode oracle && $P1 --run unans-27b-full --unans && $P1 --run unans-27b-bare --unans --mode bare" ;;
   find)    # experiments 2 and 3: filing not given; --routes picks whose router output is used
     job q27b-route Qwen/Qwen3.5-27B-FP8 "python -m finqa.cli pass0 --what route --set all && $P1 --run pathb-27b-full --path B"
-    job q9b-route Qwen/Qwen3.5-9B "python -m finqa.cli pass0 --what route --set all --out route_9b.jsonl && $P1 --run pathb-9b-full --path B --routes route_9b.jsonl && $P1 --run pathb-9b-r27 --path B --routes route.jsonl" ;;
+    job q9b-route Qwen/Qwen3.5-9B "python -m finqa.cli pass0 --what route --set all --out route_9b.jsonl && $P1 --run pathb-9b-full --path B --routes route_9b.jsonl && $P1 --run pathb-9b-r27 --path B --routes route.jsonl"
+    job q27b-r9 Qwen/Qwen3.5-27B-FP8 "$P1 --run pathb-27b-r9 --path B --routes route_9b.jsonl" ;;  # after q9b-route
   verify)  # Gemma 4 12B checks every full-pipeline answer; bare runs are finalized without it
     job verify google/gemma-4-12B-it "for r in runs/all-*-full runs/all-*-oracle runs/unans-*-full runs/pathb-*; do python -m finqa.cli pass2 --run \$(basename \$r) --suffix _gemma4; done; for r in runs/*-bare; do python -m finqa.cli finalize --run \$(basename \$r); done" "$VL" ;;
   judge)   # gpt-oss-20b grades against the gold answers; first calibrated on the paper's 2,400 human labels
