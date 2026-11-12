@@ -6,11 +6,25 @@ Live demo: finqa-demo.vercel.app (step-by-step replay on sample questions, and e
 
 This is a comparative experiment, not a product. It compares Qwen3.5 at 2B, 9B and 27B, each with and without a checking pipeline, to decide which model and setup to use later. One rule shaped the design: a wrong answer is worse than no answer. If a configuration cannot point to evidence that code has checked, it refuses and gives the reason. Every configuration is reported as three counts: correct, wrong and refused.
 
+**Terms used**
+
+| Term | Meaning |
+|---|---|
+| Bare | The model gets the question and the retrieved pages in one prompt and writes an answer. Nothing checks it. |
+| Full pipeline | The same model and pages inside the checking pipeline of section 1. Any failed check ends in a refusal. |
+| Refused | No answer is given (NOT_FOUND or AMBIGUOUS), with the reason. Counted apart from wrong answers. |
+| Provenance | The filing, PDF page, exact quote and surrounding passage behind each value in an answer. |
+| Statement pack | The pages of a filing that are its primary statements: income statement, balance sheet, cash flow statement. |
+| BM25 | Keyword ranking: orders pages by the question's words they contain, rare words counting more. |
+| Embedding search | Ranks pages by similarity of meaning, using one vector per page and one per question. |
+| Gold answer, gold page | The answer and evidence page written by FinanceBench's analysts. Used only for grading, never as input. |
+| FP8 | The 27B model's weights stored in 8 bits instead of 16, so that it fits on one GPU. |
+
 ## 1. System design
 
 **Parsing.** PyMuPDF reads each of the 363 filings and stores every page twice: plain text for search, and layout text that keeps table rows and columns (joined with "|") for the model to read. One chunk is one PDF page, so tables stay whole and the page number is the provenance. At index time, code marks the pages whose title is a primary statement (income statement, balance sheet, cash flow statement). These pages are called the statement pack, because most gold evidence is on them.
 
-**Retrieval.** Code, not the model, picks the pages: the statement pack, the top BM25 pages and the top pages by embedding similarity (Qwen3-Embedding-8B), about 12 pages. This finds a gold page for 87% of the dev questions. Four retrieval options were compared on the dev questions, with a selection rule written down before the results.
+**Retrieval.** Code, not the model, picks the pages: the statement pack, the top BM25 pages and the top pages by embedding similarity (Qwen3-Embedding-8B), about 12 pages, from the filing named in the question. This finds a gold page for 87% of the dev questions. Four retrieval options were compared on the dev questions, with a selection rule written down before the results.
 
 **Generation.** Three LLM calls, with Python checks between them.
 
@@ -20,7 +34,7 @@ This is a comparative experiment, not a product. It compares Qwen3.5 at 2B, 9B a
 4. Call 3 is a verifier from another model family (Gemma 4 12B). It looks at images of the cited pages and confirms period, unit, column and support.
 5. Code attaches the provenance (filing, page, quote, passage). The model never writes a page number.
 
-A failed check gets one retry with the error list, then a refusal. When no filing is named, a router picks up to three candidate filings, each runs the same pipeline, and disagreement returns AMBIGUOUS. "Bare" is the comparison setting: the same model and pages in one prompt, with no checks.
+A failed check gets one retry with the error list, then a refusal. When no filing is named, a router picks up to three candidate filings, each runs the same pipeline, and disagreement returns AMBIGUOUS.
 
 Models ran with vLLM on Georgia Tech's ICE cluster. The pipeline was tuned on 51 dev questions, and the other 99 were run once at the end. Numeric answers were graded by code at the gold answer's precision. Text answers were graded by gpt-oss-20b, which agreed with the FinanceBench paper's 2,400 human labels 77% of the time.
 
@@ -50,9 +64,9 @@ Three rows from the 9B answer file:
 
 **What worked.** The checks. For every size they cut wrong answers sharply (9B: 57 to 16), at the cost of correct answers (93 to 72). On 290 questions paired with a filing that holds no answer, the full pipeline gave 0 false answers with 2B and 9B and 1 with 27B. Without the checks the same models gave 53, 20 and 22. Without a named filing, 27B got 76 right, against 29 for GPT-4 Turbo in the paper's matching setup (the graders differ, so this is approximate). Because code does the arithmetic and attaches the citations, no answer can cite text that is not on its page.
 
-**What didn't.** The verifier caught only about a quarter of the wrong answers that passed the code checks (7 of 25 for 9B, 4 of 23 for 27B). Most remaining errors use a real, correctly cited number for a different definition of the metric, such as working capital from total instead of operating items. A glossary in the prompt did not help. Size cuts both ways: 27B gets the most correct answers in every setting, but it also passes the checks more often, so more of its errors reach the weak verifier. With the full pipeline it has 4 more wrong answers than 9B on all 150 questions, and 1 fewer on the 99 held-out ones. Most refusals come from the checks, not the model: 9B fails a check twice on 35 questions, often over format, such as dividing by 1000 in a formula. 2B refuses 91% of questions.
+**What didn't.** The verifier caught only about a quarter of the wrong answers that passed the code checks (7 of 25 for 9B, 4 of 23 for 27B). Most remaining errors use a real, correctly cited number for a different definition of the metric, such as working capital from total instead of operating items. A glossary in the prompt did not help. Size cuts both ways: 27B gets the most correct answers in every setting, but it also passes the checks more often, so more of its errors reach the weak verifier. With the full pipeline it has 4 more wrong answers than 9B on all 150 questions, and 1 fewer on the 99 held-out ones. Most refusals come from the checks, not the model: 9B fails a check twice on 35 questions, often over format. 2B refuses 91% of questions.
 
-**What would change, and how to choose the model.** For any model: a verifier that also checks the formula against the question, and an answer that states which definition of a metric it used. For the choice: if wrong answers must be rare, 9B or 27B with the pipeline and a stronger verifier. If coverage matters more, 27B. If cost matters, 9B, which is about 3 times faster. Compute limited the runs: 80 GB GPUs were not available, so 27B ran in FP8, the verifier was a 12B model, the judge a 20B model, and each configuration ran once. With more compute, the next step would be full-precision and larger models, a larger verifier and judge, and several runs per configuration.
+**What would change, and how to choose the model.** For any model: a verifier that also checks the formula against the question, and an answer that states which definition of a metric it used. For the choice: if wrong answers must be rare, 9B or 27B with the pipeline and a stronger verifier. If coverage matters more, 27B. If cost matters, 9B, which is about 3 times faster. Limited compute meant 27B in FP8, a 12B verifier, a 20B judge and one run per configuration. More compute would allow full-precision and larger models, a larger verifier and judge, and repeated runs.
 
 ```{=html}
 <div class="figure-page">
