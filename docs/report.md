@@ -8,9 +8,9 @@ This is a comparative experiment, not a product. It compares Qwen3.5 at 2B, 9B a
 
 ## 1. System design
 
-**Parsing.** PyMuPDF reads each of the 363 filings and stores every page twice: plain text for search, and layout text that keeps table rows and columns (joined with "|") for the model to read. One chunk is one PDF page, so tables stay whole and the page number is the provenance. At index time, code marks the pages whose title is a primary statement (income statement, balance sheet, cash flow statement). I call these the statement pack, because most gold evidence is on those pages.
+**Parsing.** PyMuPDF reads each of the 363 filings and stores every page twice: plain text for search, and layout text that keeps table rows and columns (joined with "|") for the model to read. One chunk is one PDF page, so tables stay whole and the page number is the provenance. At index time, code marks the pages whose title is a primary statement (income statement, balance sheet, cash flow statement). These pages are called the statement pack, because most gold evidence is on them.
 
-**Retrieval.** Code, not the model, picks the pages: the statement pack, the top BM25 pages and the top pages by embedding similarity (Qwen3-Embedding-8B), at most 12. This finds a gold page for 87% of the dev questions. I compared four retrieval options on the dev questions, with a selection rule written down before the results.
+**Retrieval.** Code, not the model, picks the pages: the statement pack, the top BM25 pages and the top pages by embedding similarity (Qwen3-Embedding-8B), about 12 pages. This finds a gold page for 87% of the dev questions. Four retrieval options were compared on the dev questions, with a selection rule written down before the results.
 
 **Generation.** Three LLM calls, with Python checks between them.
 
@@ -22,7 +22,7 @@ This is a comparative experiment, not a product. It compares Qwen3.5 at 2B, 9B a
 
 A failed check gets one retry with the error list, then a refusal. When no filing is named, a router picks up to three candidate filings, each runs the same pipeline, and disagreement returns AMBIGUOUS. "Bare" is the comparison setting: the same model and pages in one prompt, with no checks.
 
-Models ran with vLLM on Georgia Tech's ICE cluster. I tuned on 51 dev questions and ran the other 99 once at the end. Numeric answers were graded by code at the gold answer's precision. Text answers were graded by gpt-oss-20b, which agreed with the FinanceBench paper's 2,400 human labels 77% of the time.
+Models ran with vLLM on Georgia Tech's ICE cluster. The pipeline was tuned on 51 dev questions, and the other 99 were run once at the end. Numeric answers were graded by code at the gold answer's precision. Text answers were graded by gpt-oss-20b, which agreed with the FinanceBench paper's 2,400 human labels 77% of the time.
 
 ## 2. Answers with provenance
 
@@ -46,13 +46,13 @@ Three rows from the 9B answer file:
 - *Does American Water Works have positive working capital in FY2022?* No: $1,250 million current assets minus $2,811 million current liabilities is -$1,561 million. Evidence: AMERICANWATERWORKS_2022_10K, page 81 "Total current assets | 1,250" and page 82 "Total current liabilities | 2,811".
 - *Is Verizon's liquidity healthy based on its quick ratio for FY2022?* Refused. Reason: the model found the inputs on page 56 but could not tell which items the quick ratio should include.
 
-## 3. What worked, what didn't, and what I'd change
+## 3. What worked, what didn't, and what would change
 
 **What worked.** The checks. For every size they cut wrong answers sharply (9B: 57 to 16), at the cost of correct answers (93 to 72). On 290 questions paired with a filing that holds no answer, the full pipeline gave 0 false answers with 2B and 9B and 1 with 27B. Without the checks the same models gave 53, 20 and 22. Without a named filing, 27B got 76 right, against 29 for GPT-4 Turbo in the paper's matching setup (the graders differ, so this is approximate). Because code does the arithmetic and attaches the citations, no answer can cite text that is not on its page.
 
 **What didn't.** The verifier caught only about a quarter of the wrong answers that passed the code checks (7 of 25 for 9B, 4 of 23 for 27B). Most remaining errors use a real, correctly cited number for a different definition of the metric, such as working capital from total instead of operating items. A glossary in the prompt did not help. Size cuts both ways: 27B gets the most correct answers in every setting, but it also passes the checks more often, so more of its errors reach the weak verifier. With the full pipeline it has 4 more wrong answers than 9B on all 150 questions, and 1 fewer on the 99 held-out ones. Most refusals come from the checks, not the model: 9B fails a check twice on 35 questions, often over format, such as dividing by 1000 in a formula. 2B refuses 91% of questions.
 
-**What I'd change, and how to choose the model.** For any model: a verifier that also checks the formula against the question, and an answer that states which definition of a metric it used. For the choice: if wrong answers must be rare, 9B or 27B with the pipeline and a stronger verifier. If coverage matters more, 27B. If cost matters, 9B, which is about 3 times faster. Compute limited the runs: 80 GB GPUs were not available, so 27B ran in FP8, the verifier was a 12B model, the judge a 20B model, and each configuration ran once. With more compute I would add full-precision and larger models, a larger verifier and judge, and several runs per configuration.
+**What would change, and how to choose the model.** For any model: a verifier that also checks the formula against the question, and an answer that states which definition of a metric it used. For the choice: if wrong answers must be rare, 9B or 27B with the pipeline and a stronger verifier. If coverage matters more, 27B. If cost matters, 9B, which is about 3 times faster. Compute limited the runs: 80 GB GPUs were not available, so 27B ran in FP8, the verifier was a 12B model, the judge a 20B model, and each configuration ran once. With more compute, the next step would be full-precision and larger models, a larger verifier and judge, and several runs per configuration.
 
 ```{=html}
 <div class="figure-page">
