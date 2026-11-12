@@ -48,3 +48,8 @@ The 27B jobs waited more than a day for an 80 GB GPU. The user chose to skip 27B
 - First try: Qwen3.5-27B bf16 with tensor parallel 2 on two Blackwell GPUs. Failed with an NCCL error: ICE Blackwell GPUs are MIG partitions (47 GB each), and NCCL cannot join two MIG instances.
 - Switched to the official `Qwen/Qwen3.5-27B-FP8` (31 GB), one partition. Six pass-1 runs in parallel jobs (full, bare, oracle, unans full, unans bare, Path B). Two crashed at server start with "Stale file handle" from a shared vLLM compile cache on NFS. Fix: `VLLM_CACHE_ROOT` on node-local disk (`pace/env.sh`), reran.
 - Then Gemma 4 12B verifier and gpt-oss-20b judge, same as 2B/9B. Official config stays 9B full (dev wrong count 5 vs 10 for 27B).
+
+### 2026-11-11: experiments 2 and 3, latency benchmark (user request)
+- Results are organized as experiment 1 (filing given: 2B, 9B, 27B), experiment 2 (filing not given: 9B, 27B), experiment 3 (router vs reader: 9B and 27B in a 2x2 grid; the cell "9B router, 27B reader" was not run), and a latency benchmark. 2B is out of experiments 2 and 3.
+- 9B router output: `runs/pass0/route_9b.jsonl`. Runs `pathb-9b-full` (9B routes, 9B reads) and `pathb-9b-r27` (27B routes, 9B reads). `--routes` on pass1 selects the router output.
+- Latency: `finqa/bench.py` + `pace/bench.sbatch` (answering model and Gemma on two MIG partitions, streaming for time to first token). 20 dev questions, single and batch. Results in `runs/bench/`.

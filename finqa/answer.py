@@ -153,7 +153,7 @@ async def run_full(cl, q, doc: str, pages: list[int], ranked: list[int], *, glos
         r = await llm.chat(cl, msgs, schema=prompts.CALL1_SCHEMA, max_tokens=4000)
         out1 = r.get("json") or {}
         errs, checked = check_call1(out1, doc, shown, q.question) if out1 else (["output was not valid JSON"], None)
-        rec["attempts"].append({"call": 1, "out": out1, "errors": errs, "usage": r["usage"], "seconds": r["seconds"],
+        rec["attempts"].append({"call": 1, "out": out1, "errors": errs, "usage": r["usage"], "seconds": r["seconds"], "ttft": r.get("ttft"),
                                 "finish": r.get("finish"), "text_tail": r["text"][-300:] if r.get("finish") == "length" else ""})
         if not errs:
             break
@@ -191,7 +191,7 @@ async def run_full(cl, q, doc: str, pages: list[int], ranked: list[int], *, glos
         if not cites:
             errs2.append("no citation of a value ID such as [v1]")
         rec["attempts"].append({"call": 2, "out": {"answer": ans, "citations": cites}, "errors": errs2,
-                                "usage": r["usage"], "seconds": r["seconds"]})
+                                "usage": r["usage"], "seconds": r["seconds"], "ttft": r.get("ttft")})
         if not errs2:
             break
         if attempt == 0:

@@ -6,7 +6,7 @@ from . import llm, parse, prompts
 from .answer import filing_info
 
 
-async def verify(cl, rec: dict, question: str, thinking: bool = False, free_json: bool = False) -> dict:
+async def verify(cl, rec: dict, question: str, thinking: bool = False, free_json: bool = False, model: str | None = None) -> dict:
     """free_json: for reasoning models. No enforced schema; the model reasons, then ends with the JSON object."""
     vals = "\n".join(f'{v["id"]} {v["name"]} = {v["raw"]} ({v["scale"]}), period {v["period"]}, column "{v["column_header"]}", '
                      f'page {v["page_index"] + 1}: "{v["quote"]}"' for v in rec["values"])
@@ -23,7 +23,7 @@ async def verify(cl, rec: dict, question: str, thinking: bool = False, free_json
                   '"answer_supported": "yes"|"partly"|"no", "problem": "..."}')
     r = await llm.chat(cl, [{"role": "system", "content": sys_p}, {"role": "user", "content": content}],
                        schema=None if free_json else prompts.VERIFIER_SCHEMA,
-                       max_tokens=8000 if free_json else (4000 if thinking else 600), thinking=thinking)
+                       max_tokens=8000 if free_json else (4000 if thinking else 600), thinking=thinking, model=model)
     if free_json:
         try:
             objs = re.findall(r"\{[^{}]*\"answer_supported\"[^{}]*\}", llm.strip_think(r["text"]))
@@ -33,7 +33,7 @@ async def verify(cl, rec: dict, question: str, thinking: bool = False, free_json
     v = r.get("json") or {}
     ok = bool(v) and v.get("answer_supported") == "yes" and all(v.get(k) is True for k in
                                                                 ("period_ok", "unit_ok", "value_in_correct_column"))
-    return {"key": rec["key"], "verdict": v, "pass": ok, "usage": r["usage"], "seconds": r["seconds"], "model": llm.MODEL}
+    return {"key": rec["key"], "verdict": v, "pass": ok, "usage": r["usage"], "seconds": r["seconds"], "ttft": r.get("ttft"), "model": model or llm.MODEL}
 
 
 def _first_word(s: str) -> str:

@@ -68,7 +68,7 @@ async def run_tasks(tasks, out_path, limit):
 
 def cmd_pass0(a):
     P0.mkdir(parents=True, exist_ok=True)
-    out = P0 / f"{a.what}.jsonl"
+    out = P0 / (a.out or f"{a.what}.jsonl")
     qs = question_set(a.set, path_b=True) + (question_set(a.set, unans=True) if a.what == "plan" else [])
     done = {r["qid"] for r in read_jsonl(out)}
     cl = llm.client()
@@ -93,7 +93,7 @@ def cmd_pass1(a):
     done = {r["key"] for r in read_jsonl(out) if "key" in r}
     qs = question_set(a.set, unans=a.unans, path_b=(a.path == "B"))
     plans = {r["qid"]: r["plan"] for r in read_jsonl(P0 / "plan.jsonl")}
-    routes = {r["qid"]: r["candidates"] for r in read_jsonl(P0 / "route.jsonl")}
+    routes = {r["qid"]: r["candidates"] for r in read_jsonl(P0 / a.routes)}  # --routes: which router's choices
     oracle = {}
     if a.mode == "oracle":
         from .evals.gold import oracle_pages  # oracle setting only: gold pages are the input by definition
@@ -145,7 +145,7 @@ def finalize(run_name: str, thinking: bool = False, suffix: str | None = None) -
     suffix = suffix if suffix is not None else ("_think" if thinking else "")
     ver = {r["key"]: r for r in read_jsonl(run / f"pass2{suffix}.jsonl")}
     cfg0 = json.loads((run / "config.json").read_text())
-    routes = {r["qid"]: r["candidates"] for r in read_jsonl(P0 / "route.jsonl")}
+    routes = {r["qid"]: r["candidates"] for r in read_jsonl(P0 / cfg0.get("routes", "route.jsonl"))}
     by_q: dict[str, list[dict]] = {}
     for r in p1:
         r = dict(r)
@@ -228,6 +228,7 @@ def main(argv=None):
     s = sub.add_parser("pass0")
     s.add_argument("--what", choices=["plan", "route"], required=True)
     s.add_argument("--set", default="all")
+    s.add_argument("--out", default=None, help="file name in runs/pass0, e.g. route_9b.jsonl (router model under test)")
     s.add_argument("--limit", type=int, default=32)
     s.set_defaults(func=cmd_pass0)
     s = sub.add_parser("pass1")
@@ -240,6 +241,7 @@ def main(argv=None):
     s.add_argument("--glossary", action="store_true")
     s.add_argument("--images", action="store_true")
     s.add_argument("--budget", type=int, default=12)
+    s.add_argument("--routes", default="route.jsonl", help="router output in runs/pass0 (route.jsonl = 27B router)")
     s.add_argument("--limit", type=int, default=24)
     s.set_defaults(func=cmd_pass1)
     s = sub.add_parser("pass2")

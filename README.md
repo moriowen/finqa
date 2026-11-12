@@ -6,9 +6,13 @@ An experiment on the 150 FinanceBench questions. It compares Qwen3.5 models at t
 - **Write-up:** [`docs/report.pdf`](docs/report.pdf), 2 pages plus the diagram on page 3.
 - **All answers with provenance:** [`results/answers.md`](results/answers.md) (9B), [`results/answers-all-27b-full.md`](results/answers-all-27b-full.md), [`results/answers-all-2b-full.md`](results/answers-all-2b-full.md), [`results/answers-pathb-27b-full.md`](results/answers-pathb-27b-full.md).
 
-## Results in one table
+## Experiments
 
-Every configuration is reported as three counts out of 150: correct, wrong, refused (decision A24 in [`docs/assumptions.md`](docs/assumptions.md)). No configuration is "the official one". The table is the comparison.
+Three experiments on the same 150 questions, plus a latency benchmark. Every configuration is reported as three counts out of 150: correct, wrong, refused (decision A24 in [`docs/assumptions.md`](docs/assumptions.md)). No configuration is "the official one". The tables are the comparison. 2B was dropped after experiment 1, because it answers too few questions to be useful.
+
+### Experiment 1: the document is given
+
+FinanceBench gives each question with its filing, so the system only has to read that filing and answer. This tests **reading**.
 
 | Model | Setting | Correct | Wrong | Refused |
 |---|---|---|---|---|
@@ -18,17 +22,82 @@ Every configuration is reported as three counts out of 150: correct, wrong, refu
 | Qwen3.5-9B | full harness | 72 | 16 | 62 |
 | Qwen3.5-27B (FP8) | bare | 101 | 48 | 1 |
 | Qwen3.5-27B (FP8) | full harness | 80 | 20 | 50 |
-| Qwen3.5-27B (FP8) | full harness, no filing named (Path B) | 76 | 16 | 58 |
 | GPT-4 Turbo, FinanceBench paper, single store (human labels) | | 75 | 17 | 58 |
-| GPT-4 Turbo, FinanceBench paper, shared store, no filing named (human labels) | | 29 | 20 | 101 |
 
-How to read it:
+Why the results look like this:
 
-- **The harness trades correct answers for fewer wrong ones.** For 9B it removes 41 wrong answers and gives up 21 correct ones, which become refusals.
-- **A bigger model gets more right in every setting.** With the harness, 27B gets 8 more correct answers than 9B and 4 more wrong ones. On the 99 held-out test questions alone, 27B is ahead on both counts: 54 correct and 10 wrong, against 46 and 11 for 9B.
-- **2B makes almost no wrong answers with the harness, because it answers almost nothing** (14 of 150).
-- **Without the filing named, 27B still gets 76 right.** GPT-4 Turbo got 29 in the paper's matching setup. Both have a similar number of wrong answers. The paper used human graders and we used a model judge, so this comparison is approximate.
-- **Questions with no answer in the filing:** of 290, the harness gave 0 false answers with 2B and 9B and 1 with 27B. The same models without the harness gave 53, 20 and 22.
+- **The harness trades correct answers for fewer wrong ones.** For 9B it removes 41 wrong answers and gives up 21 correct ones. Most of the lost correct answers failed a code check twice, often over format (a quote not copied exactly, or a division by 1000 inside a formula).
+- **A bigger model gets more right in every setting**, because it reads tables better and passes the format checks more often. With the harness, 27B has 8 more correct answers than 9B and 4 more wrong ones. 27B passes the checks on more questions (106 against 97), so more of its mistakes reach the verifier, which catches only about a quarter of them. On the 99 held-out test questions alone, 27B is ahead on both counts (54 correct, 10 wrong, against 46 and 11).
+- **2B makes almost no wrong answers with the harness, because it answers almost nothing** (14 of 150). It fails the checks or reports "not found" on the rest.
+
+### Experiment 2: the system must find the document
+
+The same 150 questions with the filing name hidden. The system first picks the filing (a router LLM names company, year and type; code filters the 363 filings to up to 3 candidates), then reads it. This tests **finding plus reading**. The FinanceBench paper calls this the "shared store" setting.
+
+| Model (finds and reads) | Correct | Wrong | Refused | LLM calls per question |
+|---|---|---|---|---|
+| Qwen3.5-9B | *pending* | *pending* | *pending* | *pending* |
+| Qwen3.5-27B (FP8) | 76 | 16 | 58 | 5.6 |
+| GPT-4 Turbo, FinanceBench paper, shared store (human labels) | 29 | 20 | 101 | n/a |
+
+Why the results look like this:
+
+- **Finding the filing cost 27B only 4 correct answers** (80 with the filing given, 76 without). The router names the right company for 147 of 150 questions.
+- **It also had 4 fewer wrong answers** (20 to 16). Of 27B's 20 wrong answers in experiment 1, 7 became refusals and 2 became correct. 5 new wrong answers appeared. When candidate filings disagree, the system returns AMBIGUOUS instead of choosing: this happened on 14 questions, and it cost 10 answers that were correct in experiment 1.
+- **It costs more calls:** one router call, then the full pipeline on each candidate filing (2.2 per question on average). Searching the best-ranked filing first and stopping when it answers would bring this close to 3 calls.
+- GPT-4 Turbo in the paper's matching setup got 29 correct answers. The paper used human graders and we used a model judge, so this comparison is approximate.
+
+### Experiment 3: which job needs the bigger model, finding or reading?
+
+In experiment 2 one model does two jobs: the **router** picks the filing (one short call), and the **reader** reads the pages and answers (the long calls). This experiment gives the two jobs different models.
+
+**Router alone**, scored against the known correct filing:
+
+| Router | Right company | Right filing among candidates | Right filing ranked first | Candidates per question |
+|---|---|---|---|---|
+| 9B | 142 / 150 | 124 / 150 | 119 / 150 | 1.95 |
+| 27B | 147 / 150 | 130 / 150 | 118 / 150 | 2.22 |
+
+**Router and reader combined** (full harness, filing not given):
+
+| | 9B reads | 27B reads |
+|---|---|---|
+| **9B picks the filing** | *pending* | not run |
+| **27B picks the filing** | *pending* | 76 correct, 16 wrong, 58 refused |
+
+Reading the grid: the same row with a different reader shows what a bigger reader buys. The same column with a different router shows what a bigger router buys.
+
+Why the router results look like this:
+
+- **Picking the filing is easy for both sizes.** It is a choice of 1 name out of 42, plus a year. 9B ranks the right filing first as often as 27B (119 against 118). It misses a few more company names (142 against 147).
+- **Most router misses are not reasoning errors.** In most of the 20 cases where 27B missed the right filing, the question does not say which kind of document it means. For example, "Ulta Beauty's FY2023 results" is answered in the dataset from the Q4 earnings release, while the router picked the 10-K, which contains the same numbers. A bigger router cannot fix missing information. Asking the user can.
+- **Expectation for the grid,** to be checked when the results arrive: finding the filing does not need the big model, and reading it does. In experiment 1, 27B gained 12 correct answers from perfect pages and 9B gained 1, so the reading step is where size matters.
+
+### Latency benchmark
+
+20 dev questions, filing given, full harness. "Single" sends one question at a time to an idle GPU. "Batch" sends all 20 at once. Each model ran on half of an RTX PRO 6000 Blackwell (a 47 GB MIG partition), with the Gemma verifier on a second partition. Source: [`runs/bench/`](runs/bench/), [`finqa/bench.py`](finqa/bench.py).
+
+| Stage, single question (median) | 9B | 27B (FP8) |
+|---|---|---|
+| Retrieval (BM25 + embeddings) | 0.07 s | 0.04 s |
+| Call 1: time to first token | 1.2 s | 2.0 s |
+| **Call 1: full JSON output** | **13.1 s** | **44.1 s** |
+| Code checks and Python arithmetic | 0.005 s | 0.007 s |
+| Call 2: write the answer | 2.9 s | 3.5 s |
+| Verifier (Gemma 4 12B) | 1.9 s | 1.9 s |
+| **Total** (90th percentile) | **18 s** (26 s) | **48 s** (69 s) |
+
+| Batch of 20 | 9B | 27B (FP8) |
+|---|---|---|
+| Median time per question | 24 s | 184 s |
+| Throughput | about 1,380 questions per hour | about 230 questions per hour |
+
+Why the results look like this:
+
+- **Call 1 is almost all of the time.** It writes about 500 tokens of JSON (values, quotes, formula, and a free-text reason). On these partitions the models write about 45 tokens per second (9B) and 25 (27B). Retrieval and the code checks take milliseconds.
+- **Retries repeat call 1.** A failed check sends the whole call again, which is why the 90th percentile is much higher than the median.
+- **27B saturates in batch.** Its 31 GB of weights leave little memory on a 47 GB partition for 20 long prompts at once (about 11,000 prompt tokens each), so requests wait in line. 9B has room and keeps its speed.
+- **Ways to cut the wait:** a shorter call 1 output (drop the free-text reason when values are found), fewer retries (a more tolerant quote check), showing progress to the user while the pipeline runs, and faster GPUs (a full H100 writes about 2 to 4 times faster than a MIG partition, an estimate not measured here).
 
 ## Bare model against full harness
 
@@ -85,7 +154,7 @@ Every design decision, with its evidence and what happens if it is wrong, is in 
 
 All numbers come from `python -m finqa.evals.tables` ([`results/tables.md`](results/tables.md), [`results/summary.json`](results/summary.json)). Nothing is typed by hand.
 
-### Every setting (150 questions, filing named)
+### Every setting of experiment 1 (150 questions, filing named)
 
 "Oracle" gives the model the gold pages instead of retrieved ones. It is a control that measures what retrieval costs. "Glossary" adds financial definitions to the prompt.
 
@@ -102,7 +171,6 @@ All numbers come from `python -m finqa.evals.tables` ([`results/tables.md`](resu
 | 27B (FP8) | bare | 101 | 48 | 1 | 67 / 31 / 1 | n/a |
 | 27B (FP8) | full | 80 | 20 | 50 | 54 / 10 / 35 | 86 of 101 |
 | 27B (FP8) | oracle pages | 92 | 13 | 45 | 59 / 7 / 33 | 107 of 107 |
-| 27B (FP8) | Path B, no filing named | 76 | 16 | 58 | 50 / 7 / 42 | 69 of 92 |
 
 The glossary was not run for 27B, because it lowered coverage for 2B and 9B without reducing wrong answers.
 
