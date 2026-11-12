@@ -34,17 +34,18 @@ Why the results look like this:
 
 The same 150 questions with the filing name hidden. The system first picks the filing (a router LLM names company, year and type; code filters the 363 filings to up to 3 candidates), then reads it. This tests **finding plus reading**. The FinanceBench paper calls this the "shared store" setting.
 
-| Model (finds and reads) | Correct | Wrong | Refused | LLM calls per question |
-|---|---|---|---|---|
-| Qwen3.5-9B | *pending* | *pending* | *pending* | *pending* |
-| Qwen3.5-27B (FP8) | 76 | 16 | 58 | 5.6 |
-| GPT-4 Turbo, FinanceBench paper, shared store (human labels) | 29 | 20 | 101 | n/a |
+| Model (finds and reads) | Correct | Wrong | Refused | Same model, filing given (experiment 1) | LLM calls per question |
+|---|---|---|---|---|---|
+| Qwen3.5-9B | 59 | 20 | 71 | 72 / 16 / 62 | 5.5 |
+| Qwen3.5-27B (FP8) | 76 | 16 | 58 | 80 / 20 / 50 | 6.4 |
+| GPT-4 Turbo, FinanceBench paper, shared store (human labels) | 29 | 20 | 101 | 75 / 17 / 58 | n/a |
 
 Why the results look like this:
 
-- **Finding the filing cost 27B only 4 correct answers** (80 with the filing given, 76 without). The router names the right company for 147 of 150 questions.
-- **It also had 4 fewer wrong answers** (20 to 16). Of 27B's 20 wrong answers in experiment 1, 7 became refusals and 2 became correct. 5 new wrong answers appeared. When candidate filings disagree, the system returns AMBIGUOUS instead of choosing: this happened on 14 questions, and it cost 10 answers that were correct in experiment 1.
-- **It costs more calls:** one router call, then the full pipeline on each candidate filing (2.2 per question on average). Searching the best-ranked filing first and stopping when it answers would bring this close to 3 calls.
+- **Finding the filing cost 9B much more than 27B.** 9B lost 13 correct answers (72 to 59) and gained 4 wrong ones. 27B lost only 4 correct answers (80 to 76). Experiment 3 shows why: the router is not the problem, the reader is.
+- **A likely reason:** with 2 or 3 candidate filings, the reading gets harder. A later filing repeats last year's numbers as a comparison column, so the reader must pick the right column in a filing that is not the one the question was written for. 27B copes with this better than 9B.
+- **27B also had 4 fewer wrong answers** (20 to 16). Of 27B's 20 wrong answers in experiment 1, 7 became refusals and 2 became correct. 5 new wrong answers appeared. When candidate filings disagree, the system returns AMBIGUOUS instead of choosing: this happened on 14 questions, and it cost 10 answers that were correct in experiment 1.
+- **It costs more calls:** one router call, then the full pipeline and the verifier on each candidate filing (about 2 per question). Searching the best-ranked filing first and stopping when it answers would bring this close to 4 calls.
 - GPT-4 Turbo in the paper's matching setup got 29 correct answers. The paper used human graders and we used a model judge, so this comparison is approximate.
 
 ### Experiment 3: which job needs the bigger model, finding or reading?
@@ -62,8 +63,8 @@ In experiment 2 one model does two jobs: the **router** picks the filing (one sh
 
 | | 9B reads | 27B reads |
 |---|---|---|
-| **9B picks the filing** | *pending* | not run |
-| **27B picks the filing** | *pending* | 76 correct, 16 wrong, 58 refused |
+| **9B picks the filing** | 59 correct, 20 wrong, 71 refused | not run |
+| **27B picks the filing** | 58 correct, 20 wrong, 72 refused | 76 correct, 16 wrong, 58 refused |
 
 Reading the grid: the same row with a different reader shows what a bigger reader buys. The same column with a different router shows what a bigger router buys.
 
@@ -71,7 +72,11 @@ Why the router results look like this:
 
 - **Picking the filing is easy for both sizes.** It is a choice of 1 name out of 42, plus a year. 9B ranks the right filing first as often as 27B (119 against 118). It misses a few more company names (142 against 147).
 - **Most router misses are not reasoning errors.** In most of the 20 cases where 27B missed the right filing, the question does not say which kind of document it means. For example, "Ulta Beauty's FY2023 results" is answered in the dataset from the Q4 earnings release, while the router picked the 10-K, which contains the same numbers. A bigger router cannot fix missing information. Asking the user can.
-- **Expectation for the grid,** to be checked when the results arrive: finding the filing does not need the big model, and reading it does. In experiment 1, 27B gained 12 correct answers from perfect pages and 9B gained 1, so the reading step is where size matters.
+- **The grid confirms it: reading needs the bigger model, finding does not.**
+  - Same router (27B), bigger reader: 58 to 76 correct, 20 to 16 wrong. On 23 questions only the 27B reader was right.
+  - Same reader (9B), bigger router: 59 to 58 correct, 20 to 20 wrong. No difference.
+  - This matches experiment 1, where perfect pages gave 27B 12 more correct answers and 9B only 1: the reading step is where size matters.
+- **Practical consequence:** a small model can pick the filing, and the large model is needed only for the reading calls. The router is one short call, so the saving is small, but the large model can be kept for the step that benefits from it.
 
 ### Latency benchmark
 
@@ -243,6 +248,8 @@ Rule fixed before the results: take the cheapest option within 5 points of the b
 - **9B loses answers to format errors.** It fails code checks twice on 35 questions, for example by putting `/1000` in a formula or copying a quote inexactly.
 
 ## What would change the choice of model
+
+- **Experiment 3 splits the work:** a small model is enough to pick the filing, while reading the filing and answering benefits from the larger model (18 more correct answers with the same router).
 
 - **If a wrong answer is far worse than a refusal:** 9B or 27B with the harness, plus a stronger verifier. 9B has slightly fewer wrong answers on the full set. 27B has more correct answers and is ahead on the held-out test set.
 - **If coverage matters more:** 27B, which gets the most correct answers in every setting.

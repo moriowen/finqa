@@ -19,6 +19,7 @@ RUNS = [  # (run, label)
     ("all-9b-full", "Qwen3.5-9B, full pipeline, filing given"),
     ("all-27b-full", "Qwen3.5-27B FP8, full pipeline, filing given"),
     ("pathb-27b-full", "Qwen3.5-27B FP8, full pipeline, no filing given (Path B)"),
+    ("pathb-9b-full", "Qwen3.5-9B, full pipeline, no filing given (Path B)"),
     ("all-2b-full", "Qwen3.5-2B, full pipeline, filing given"),
     ("all-9b-bare", "Qwen3.5-9B, bare: same pages, one prompt, no checks"),
     ("all-27b-bare", "Qwen3.5-27B FP8, bare: same pages, one prompt, no checks"),

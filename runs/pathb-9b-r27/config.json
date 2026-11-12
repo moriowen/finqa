@@ -1,0 +1,14 @@
+{
+ "run": "pathb-9b-r27",
+ "set": "all",
+ "mode": "full",
+ "arm": "r1",
+ "path": "B",
+ "unans": false,
+ "glossary": false,
+ "images": false,
+ "budget": 12,
+ "routes": "route.jsonl",
+ "limit": 24,
+ "model": "Qwen/Qwen3.5-9B"
+}
