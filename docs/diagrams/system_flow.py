@@ -32,7 +32,7 @@ ANSWER = [
     ("code", "Route the question", "filing named → Path A. Else LLM picks company (1 of 42), period, type → up to 3 filings (Path B)",
      "Path B keeps up to 3 candidate filings instead of guessing one. Each runs alone, so two filings never "
      "share a prompt.", "no company"),
-    ("code", "Select up to 12 pages", "statement pack + BM25 + dense, fused by reciprocal rank",
+    ("code", "Select about 12 pages", "statement pack + BM25 + dense, fused by reciprocal rank",
      "Picked on dev with a rule fixed in advance: the cheapest option within 5 points of the best. Gold-page "
      "recall 84% → 87% with dense. LLM query planning added cost, not recall.", None),
     ("llm", "Call 1: extract values", "Qwen3.5 2B / 9B / 27B on vLLM · JSON schema enforced",
